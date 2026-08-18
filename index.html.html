@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulado Interativo</title>
+    <style>
+        * { box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background-color: #f7fafc; color: #2d3748; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { max-width: 600px; width: 100%; background: #ffffff; padding: 20px; border-radius: 10px; border-top: 5px solid #1a365d; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        header { text-align: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; }
+        h1 { font-size: 1.2rem; color: #1a365d; margin: 0 0 5px 0; }
+        .progress-bar-container { width: 100%; background-color: #e2e8f0; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 10px; }
+        .progress-bar { height: 100%; background-color: #c53030; width: 0%; transition: width 0.3s ease; }
+        .question-meta { font-size: 0.8rem; color: #718096; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; }
+        .question-text { font-size: 1rem; font-weight: bold; margin-bottom: 15px; color: #1a202c; }
+        .options-container { display: flex; flex-direction: column; gap: 8px; }
+        .option-btn { background: #ffffff; border: 2px solid #e2e8f0; padding: 10px 14px; border-radius: 6px; text-align: left; font-size: 0.9rem; cursor: pointer; color: #2d3748; }
+        .option-btn:hover { background-color: #edf2f7; }
+        .option-btn.selected-correct { background-color: #f0fff4; border-color: #38a169; color: #22543d; font-weight: bold; }
+        .option-btn.selected-incorrect { background-color: #fff5f5; border-color: #e53e3e; color: #742a2a; }
+        .feedback-box { margin-top: 15px; padding: 12px; border-radius: 6px; display: none; font-size: 0.85rem; line-height: 1.4; }
+        .feedback-box.correct { background-color: #f0fff4; border: 1px solid #c6f6d5; color: #22543d; }
+        .feedback-box.incorrect { background-color: #fff5f5; border: 1px solid #fed7d7; color: #742a2a; }
+        .nav-actions { margin-top: 15px; display: flex; justify-content: flex-end; }
+        .next-btn { background-color: #1a365d; color: white; border: none; padding: 8px 16px; border-radius: 5px; font-weight: bold; cursor: pointer; display: none; }
+        .results-card { text-align: center; display: none; }
+        .score-circle { width: 100px; height: 100px; border-radius: 50%; background: #1a365d; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: bold; margin: 15px auto; }
+        .restart-btn { background-color: #c53030; color: white; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 0.9rem; margin-top: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Simulado Interativo</h1>
+        <small>Ética, Deontologia & Cultura Geral de Angola</small>
+        <div class="progress-bar-container"><div class="progress-bar" id="progress-bar"></div></div>
+    </header>
+    <div id="quiz-screen">
+        <div class="question-meta" id="question-number">Questão 1 de 12</div>
+        <div class="question-text" id="question-text">Carregando...</div>
+        <div class="options-container" id="options-container"></div>
+        <div class="feedback-box" id="feedback-box"></div>
+        <div class="nav-actions"><button class="next-btn" id="next-btn" onclick="nextQuestion()">Próxima Questão</button></div>
+    </div>
+    <div id="results-screen" class="results-card">
+        <h2>Simulado Concluído!</h2>
+        <p>Pontuação final:</p>
+        <div class="score-circle" id="score-text">0/12</div>
+        <p id="performance-msg"></p>
+        <button class="restart-btn" onclick="restartQuiz()">Repetir Simulado</button>
+    </div>
+</div>
+<script>
+const quizData = [
+    { question: "Ética significa:", options: [{ text: "a) Conjunto de regras impostas pelo governo", correct: false, explanation: "Refere-se ao direito e às leis formais." }, { text: "b) Reflexão crítica sobre os valores que orientam o agir humano", correct: true, explanation: "Correto! A ética analisa e reflete criticamente os valores da conduta humana." }, { text: "c) Conhecimento técnico de uma profissão", correct: false, explanation: "Diz respeito às competências operacionais." }, { text: "d) Obediência cega às normas", correct: false, explanation: "A ética exige consciência crítica." }] },
+    { question: "A deontologia profissional regula:", options: [{ text: "a) Apenas os direitos dos profissionais", correct: false, explanation: "Contempla também deveres e responsabilidades." }, { text: "b) Deveres, direitos e responsabilidades éticas no exercício da profissão", correct: true, explanation: "Correto! É o código de conduta do exercício profissional." }, { text: "c) A relação entre empresas privadas", correct: false, explanation: "Pertence ao Direito Civil e Comercial." }, { text: "d) A organização do Estado", correct: false, explanation: "Pertence ao Direito Constitucional." }] },
+    { question: "O nepotismo consiste em:", options: [{ text: "a) Promover a igualdade de oportunidades", correct: false, explanation: "A igualdade baseia-se na meritocracia." }, { text: "b) Favorecer parentes em cargos públicos", correct: true, explanation: "Correto! É a concessão de cargos/vantagens a familiares." }, { text: "c) Contratar estrangeiros", correct: false, explanation: "Prática laboral regulamentada." }, { text: "d) Exercer função pública com eficiência", correct: false, explanation: "Dever administrativo legal." }] },
+    { question: "O sigilo profissional pode ser quebrado:", options: [{ text: "a) Por qualquer motivo pessoal", correct: false, explanation: "Interesses pessoais não justificam a quebra." }, { text: "b) Somente quando a lei autoriza ou o interessado consente", correct: true, explanation: "Correto! Exige autorização legal ou autorização prévia." }, { text: "c) Para obter vantagem econômica", correct: false, explanation: "Infração ético-legal grave." }, { text: "d) Quando não há testemunhas", correct: false, explanation: "Não invalida a obrigação de segredo." }] },
+    { question: "O princípio da probidade pública está ligado a:", options: [{ text: "a) Riqueza material", correct: false, explanation: "Não reflete a postura ética no serviço público." }, { text: "b) Honestidade e integridade na função pública", correct: true, explanation: "Correto! Exige honestidade, lealdade e transparência." }, { text: "c) Segredo absoluto", correct: false, explanation: "A administração pauta-se pela transparência." }, { text: "d) Competitividade", correct: false, explanation: "Atua em mercados, não na conduta ético-administrativa." }] },
+    { question: "Qual é o lema da República de Angola?", options: [{ text: "a) Liberdade, Igualdade, Fraternidade", correct: false, explanation: "Lema da República Francesa." }, { text: "b) Disciplina, Trabalho e Coragem", correct: true, explanation: "Correto! Lema oficial constitucional de Angola." }, { text: "c) União, Força e Pátria", correct: false, explanation: "Não é o lema oficial." }, { text: "d) Ordem e Progresso", correct: false, explanation: "Lema oficial do Brasil." }] },
+    { question: "A independência de Angola foi proclamada em:", options: [{ text: "a) 25 de Abril de 1974", correct: false, explanation: "Revolução dos Cravos em Portugal." }, { text: "b) 11 de Novembro de 1975", correct: true, explanation: "Correto! Proclamada a 11 de Novembro de 1975." }, { text: "c) 4 de Fevereiro de 1961", correct: false, explanation: "Início da Luta Armada." }, { text: "d) 1 de Janeiro de 1976", correct: false, explanation: "Data incorreta." }] },
+    { question: "O primeiro Presidente de Angola foi:", options: [{ text: "a) José Eduardo dos Santos", correct: false, explanation: "Assumiu o cargo em 1979." }, { text: "b) António Agostinho Neto", correct: true, explanation: "Correto! Dr. António Agostinho Neto foi o primeiro Presidente." }, { text: "c) João Lourenço", correct: false, explanation: "Tomou posse em 2017." }, { text: "d) Holden Roberto", correct: false, explanation: "Líder da FNLA, não assumiu a Presidência." }] },
+    { question: "O Hino Nacional de Angola chama-se:", options: [{ text: "a) Pátria Amada", correct: false, explanation: "Hino de Moçambique." }, { text: "b) Angola Avante", correct: true, explanation: "Correto! Hino nacional adotado em 1975." }, { text: "c) Terra Mãe", correct: false, explanation: "Designação incorreta." }, { text: "d) Independência ou Morte", correct: false, explanation: "Não é o título do hino." }] },
+    { question: "A bandeira angolana tem como cores:", options: [{ text: "a) Verde e amarela", correct: false, explanation: "Cores incorretas." }, { text: "b) Vermelha e preta, com símbolo amarelo", correct: true, explanation: "Correto! Faixas vermelha e preta com insígnia amarela." }, { text: "c) Azul e branca", correct: false, explanation: "Cores incorretas." }, { text: "d) Vermelha, verde e amarela", correct: false, explanation: "Composição de outros países." }] },
+    { question: "Qual destes símbolos representa o trabalho agrícola e industrial?", options: [{ text: "a) Estrela", correct: false, explanation: "Simboliza a solidariedade e o progresso." }, { text: "b) Livro", correct: false, explanation: "Representa a educação e a cultura." }, { text: "c) Catana e engrenagem", correct: true, explanation: "Correto! Catana (agricultura) e engrenagem (indústria)." }, { text: "d) Sol nascente", correct: false, explanation: "Simboliza um futuro promissor." }] },
+    { question: "A Constituição da República de Angola (CRA) entrou em vigor em:", options: [{ text: "a) 1991", correct: false, explanation: "Revisão para o multipartidarismo." }, { text: "b) 2010", correct: true, explanation: "Correto! A atual CRA foi aprovada em 2010." }, { text: "c) 1975", correct: false, explanation: "Primeira Lei Constitucional." }, { text: "d) 2002", correct: false, explanation: "Ano da Paz Definitiva." }] }
+];
+
+let currentQuestion = 0, score = 0, answered = false;
+
+function loadQuestion() {
+    answered = false; 
+    const q = quizData[currentQuestion];
+    document.getElementById("question-number").innerText = "Questão " + (currentQuestion + 1) + " de " + quizData.length;
+    document.getElementById("question-text").innerText = q.question;
+    document.getElementById("progress-bar").style.width = ((currentQuestion) / quizData.length * 100) + "%";
+    const optionsContainer = document.getElementById("options-container"); 
+    optionsContainer.innerHTML = "";
+    document.getElementById("feedback-box").style.display = "none"; 
+    document.getElementById("next-btn").style.display = "none";
+    q.options.forEach((opt, index) => {
+        const btn = document.createElement("button"); 
+        btn.className = "option-btn"; 
+        btn.innerText = opt.text;
+        btn.onclick = function() { selectOption(index); }; 
+        optionsContainer.appendChild(btn);
+    });
+}
+
+function selectOption(index) {
+    if (answered) return; 
+    answered = true;
+    const q = quizData[currentQuestion];
+    const selectedOpt = q.options[index];
+    const buttons = document.querySelectorAll(".option-btn");
+    const feedbackBox = document.getElementById("feedback-box");
+    
+    buttons.forEach((btn, idx) => { 
+        btn.disabled = true; 
+        if (q.options[idx].correct) btn.classList.add("selected-correct"); 
+    });
+    
+    if (selectedOpt.correct) { 
+        score++; 
+        feedbackBox.className = "feedback-box correct"; 
+        feedbackBox.innerHTML = "<strong>Correto!</strong><br>" + selectedOpt.explanation; 
+    } else { 
+        buttons[index].classList.add("selected-incorrect"); 
+        feedbackBox.className = "feedback-box incorrect"; 
+        feedbackBox.innerHTML = "<strong>Incorreto.</strong><br>" + selectedOpt.explanation; 
+    }
+    feedbackBox.style.display = "block"; 
+    document.getElementById("next-btn").style.display = "block";
+}
+
+function nextQuestion() { 
+    currentQuestion++; 
+    if (currentQuestion < quizData.length) {
+        loadQuestion(); 
+    } else {
+        showResults(); 
+    }
+}
+
+function showResults() {
+    document.getElementById("quiz-screen").style.display = "none"; 
+    document.getElementById("results-screen").style.display = "block";
+    document.getElementById("progress-bar").style.width = "100%"; 
+    document.getElementById("score-text").innerText = score + "/" + quizData.length;
+    document.getElementById("performance-msg").innerText = (score/quizData.length >= 0.8) ? "Excelente desempenho!" : "Continue a praticar para melhorar a pontuação.";
+}
+
+function restartQuiz() { 
+    currentQuestion = 0; 
+    score = 0; 
+    document.getElementById("quiz-screen").style.display = "block"; 
+    document.getElementById("results-screen").style.display = "none"; 
+    loadQuestion(); 
+}
+
+window.onload = loadQuestion;
+</script>
+</body>
+</html>
+          
