@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Simulado Focado: Língua Portuguesa & Lógica Matemática</title>
+<style>
+:root{--bg:#0f172a;--card:#fff;--ink:#172033;--muted:#64748b;--accent:#1d4ed8;--good:#15803d;--bad:#b91c1c;--gold:#ca8a04}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(135deg,#0f172a,#1e3a8a);color:var(--ink);min-height:100vh}
+.wrap{max-width:900px;margin:auto;padding:22px}
+.card{background:#fff;border-radius:18px;padding:26px;box-shadow:0 15px 45px #0005;margin:15px 0}
+h1{margin:0 0 8px;font-size:26px;color:#1e3a8a}
+h2{margin-top:0}
+.question-title{display:block;font-size:20px;line-height:1.45;margin:18px 0 14px;font-weight:800}
+.sub{color:var(--muted)}
+label{display:block;font-weight:bold;margin:16px 0 7px}
+input{width:100%;padding:14px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px}
+button{border:0;border-radius:10px;padding:13px 18px;font-size:16px;font-weight:bold;cursor:pointer;background:var(--accent);color:#fff;margin-top:12px}
+button:hover{filter:brightness(.94)}
+.hidden{display:none}
+.top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.pill{padding:8px 12px;border-radius:999px;background:#e2e8f0;font-size:13px;font-weight:bold}
+.timer{font-size:22px;color:#991b1b;font-weight:bold}
+.progress{height:10px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin:14px 0}
+.bar{height:100%;background:var(--accent);width:0;transition:.2s}
+.option{display:block;width:100%;text-align:left;background:#f8fafc;color:#172033;border:2px solid #e2e8f0;margin:10px 0;padding:15px;border-radius:12px;cursor:pointer}
+.option:hover{border-color:#93c5fd;background:#eff6ff}
+.option.correct{border-color:#16a34a;background:#dcfce7}
+.option.wrong{border-color:#dc2626;background:#fee2e2}
+.option:disabled{cursor:default}
+select{background:#fff}
+.feedback{font-weight:bold;margin-top:10px}
+.good{color:var(--good)}
+.bad{color:var(--bad)}
+.math{margin-top:12px;background:#fff7ed;padding:12px;border-radius:10px;border-left:4px solid #f97316}
+.small{font-size:13px;color:var(--muted)}
+.center{text-align:center}
+.score{font-size:42px;font-weight:800}
+.approved{color:var(--good)}
+.failed{color:var(--bad)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="start" class="card">
+    <h1>📐 Simulado Exclusivo: Língua Portuguesa & Lógica Matemática</h1>
+    <p class="sub">40 Perguntas extraídas do banco oficial • 1 minuto por questão • Cotação: 20 valores</p>
+    <div class="notice" style="padding:12px;border-radius:10px;background:#eff6ff;color:#1e3a8a;margin:10px 0;">
+      Este simulado reúne apenas as matérias exatas e linguísticas para treino intensivo.
+    </div>
+    <label for="player">Nome do candidato</label>
+    <input id="player" maxlength="60" placeholder="Digite o seu nome">
+    <label for="mode">Selecione o Foco</label>
+    <select id="mode" style="width:100%;padding:14px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px">
+      <option value="todas">Português + Matemática (40 questões)</option>
+      <option value="Língua Portuguesa">Apenas Língua Portuguesa (18 questões)</option>
+      <option value="Lógica Matemática">Apenas Lógica Matemática (22 questões)</option>
+    </select>
+    <button onclick="startGame()">Iniciar Simulado</button>
+  </div>
+
+  <div id="game" class="card hidden">
+    <div class="top">
+      <div><span class="pill" id="topic"></span> <span class="pill" id="counter"></span></div>
+      <div class="timer" id="timer">01:00</div>
+    </div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <h2 id="question" class="question-title"></h2>
+    <div id="options"></div>
+    <div id="feedback"></div>
+    <div id="mathBox" class="math hidden"></div>
+    <div id="actions" style="display:flex;gap:10px;flex-wrap:wrap">
+      <button id="mathHelp" class="hidden" onclick="showMathHelp()">Ver explicação (-0,75 valores)</button>
+      <button id="skipBtn" onclick="skipQuestion()">Pular pergunta</button>
+    </div>
+  </div>
+
+  <div id="result" class="card hidden center">
+    <h2>Resultado Final</h2>
+    <p id="resultName"></p>
+    <div class="score" id="score"></div>
+    <h2 id="status"></h2>
+    <p id="details"></p>
+    <button onclick="location.reload()">Refazer Simulado</button>
+  </div>
+</div>
+
+<script>
+const BANK = [
+  // LÍNGUA PORTUGUESA (18 Questões)
+  {"topic": "Língua Portuguesa", "q": "Qual é o plural de cidadão?", "options": ["Cidadões", "Cidadãos", "Cidadães", "Cidadans"], "answer": 1, "explanation": "O plural correto de cidadão é cidadãos."},
+  {"topic": "Língua Portuguesa", "q": "Qual é o plural de pão?", "options": ["Pãos", "Pães", "Pões", "Pans"], "answer": 1, "explanation": "O plural correto de pão é pães."},
+  {"topic": "Língua Portuguesa", "q": "Na frase “O aluno estudou”, qual é o sujeito?", "options": ["Estudou", "O", "Aluno", "O aluno"], "answer": 3, "explanation": "O sujeito determinado simples da oração é 'O aluno'."},
+  {"topic": "Língua Portuguesa", "q": "Na frase “Maria comprou um livro”, qual é o verbo?", "options": ["Maria", "Comprou", "Um", "Livro"], "answer": 1, "explanation": "'Comprou' é a ação, portanto, o verbo da oração."},
+  {"topic": "Língua Portuguesa", "q": "Qual destas palavras é um substantivo?", "options": ["Correr", "Bonito", "Casa", "Rapidamente"], "answer": 2, "explanation": "'Casa' dá nome a um objeto/construção, sendo um substantivo."},
+  {"topic": "Língua Portuguesa", "q": "Qual destas palavras é um verbo?", "options": ["Escola", "Estudar", "Bonito", "Rapidamente"], "answer": 1, "explanation": "'Estudar' expressa uma ação no infinitivo."},
+  {"topic": "Língua Portuguesa", "q": "Qual destas palavras é um adjetivo?", "options": ["Casa", "Correr", "Bonito", "Ontem"], "answer": 2, "explanation": "'Bonito' expressa uma característica ou qualidade."},
+  {"topic": "Língua Portuguesa", "q": "Qual é o antónimo de alto?", "options": ["Grande", "Baixo", "Largo", "Forte"], "answer": 1, "explanation": "O sentido oposto (antónimo) de alto é baixo."},
+  {"topic": "Língua Portuguesa", "q": "Qual é o sinónimo de feliz?", "options": ["Triste", "Alegre", "Zangado", "Fraco"], "answer": 1, "explanation": "Palavra com sentido equivalente (sinónimo) a feliz é alegre."},
+  {"topic": "Língua Portuguesa", "q": "“Eu estudarei amanhã” está em que tempo verbal?", "options": ["Presente", "Pretérito perfeito", "Futuro", "Pretérito imperfeito"], "answer": 2, "explanation": "'Estudarei' indica uma ação que acontecerá no futuro."},
+  {"topic": "Língua Portuguesa", "q": "Qual é o infinitivo de “comemos”?", "options": ["Comer", "Comar", "Comido", "Comendo"], "answer": 0, "explanation": "A forma do verbo no infinitivo é 'comer'."},
+  {"topic": "Língua Portuguesa", "q": "Qual é o feminino de ator?", "options": ["Atora", "Atriz", "Actora", "Atriza"], "answer": 1, "explanation": "O feminino de ator é atriz."},
+  {"topic": "Língua Portuguesa", "q": "Qual destas palavras está corretamente acentuada?", "options": ["Cafe", "Café", "Cafê", "Cáfe"], "answer": 1, "explanation": "'Café' é uma palavra oxítona terminada em 'e', portanto leva acento agudo."},
+  {"topic": "Língua Portuguesa", "q": "Qual destas frases está correta?", "options": ["Haviam muitas pessoas.", "Havia muitas pessoas.", "Havião muitas pessoas.", "Haviam muita pessoa."], "answer": 1, "explanation": "O verbo 'haver' no sentido de existir é impessoal e fica no singular: 'Havia muitas pessoas'."},
+  {"topic": "Língua Portuguesa", "q": "Qual é a forma correta?", "options": ["À eles", "A eles", "Há eles", "Á eles"], "answer": 1, "explanation": "Não se usa crase antes de pronomes masculinos ('eles'). A forma correta é 'A eles'."},
+  {"topic": "Língua Portuguesa", "q": "Qual é a forma correta?", "options": ["Porque você faltou?", "Por que você faltou?", "Porquê você faltou?", "Por quê você faltou"], "answer": 1, "explanation": "Em perguntas diretas no início de frases, usa-se 'Por que' separado e sem acento."},
+  {"topic": "Língua Portuguesa", "q": "Qual é o coletivo de peixes?", "options": ["Alcateia", "Cardume", "Rebanho", "Manada"], "answer": 1, "explanation": "O substantivo coletivo para um grupo de peixes é 'cardume'."},
+  {"topic": "Língua Portuguesa", "q": "Qual sinal indica uma pergunta?", "options": ["!", ".", "?", ";"], "answer": 2, "explanation": "O ponto de interrogação (?) indica uma frase interrogativa."},
+
+  // LÓGICA MATEMÁTICA (22 Questões)
+  {"topic": "Lógica Matemática", "q": "Qual é o próximo número da sequência: 2, 4, 6, 8, ___?", "options": ["9", "10", "11", "12"], "answer": 1, "explanation": "A sequência aumenta de 2 em 2: 2, 4, 6, 8, 10."},
+  {"topic": "Lógica Matemática", "q": "15 + 27 = ?", "options": ["40", "41", "42", "43"], "answer": 2, "explanation": "15 + 27 = 42."},
+  {"topic": "Lógica Matemática", "q": "75 − 28 = ?", "options": ["47", "48", "49", "50"], "answer": 0, "explanation": "75 − 28 = 47."},
+  {"topic": "Lógica Matemática", "q": "8 × 7 = ?", "options": ["54", "56", "58", "64"], "answer": 1, "explanation": "8 × 7 = 56."},
+  {"topic": "Lógica Matemática", "q": "144 ÷ 12 = ?", "options": ["10", "11", "12", "14"], "answer": 2, "explanation": "144 ÷ 12 = 12."},
+  {"topic": "Lógica Matemática", "q": "Qual é o próximo número: 3, 6, 9, 12, ___?", "options": ["13", "14", "15", "16"], "answer": 2, "explanation": "A sequência aumenta de 3 em 3."},
+  {"topic": "Lógica Matemática", "q": "Qual é o próximo número: 5, 10, 20, 40, ___?", "options": ["50", "60", "70", "80"], "answer": 3, "explanation": "Cada número é multiplicado por 2."},
+  {"topic": "Lógica Matemática", "q": "Quanto é 25% de 200?", "options": ["25", "40", "50", "75"], "answer": 2, "explanation": "25% = 25/100; 200 × 0,25 = 50."},
+  {"topic": "Lógica Matemática", "q": "Quanto é 50% de 80?", "options": ["20", "30", "40", "50"], "answer": 2, "explanation": "50% é metade: 80 ÷ 2 = 40."},
+  {"topic": "Lógica Matemática", "q": "Quanto é 10% de 500?", "options": ["5", "25", "50", "100"], "answer": 2, "explanation": "10% de 500 = 500 × 0,10 = 50."},
+  {"topic": "Lógica Matemática", "q": "Qual é o dobro de 25?", "options": ["40", "45", "50", "55"], "answer": 2, "explanation": "25 × 2 = 50."},
+  {"topic": "Lógica Matemática", "q": "Qual é o triplo de 12?", "options": ["24", "30", "36", "40"], "answer": 2, "explanation": "12 × 3 = 36."},
+  {"topic": "Lógica Matemática", "q": "Qual é a metade de 90?", "options": ["40", "45", "50", "55"], "answer": 1, "explanation": "90 ÷ 2 = 45."},
+  {"topic": "Lógica Matemática", "q": "Qual é a terça parte de 60?", "options": ["10", "15", "20", "30"], "answer": 2, "explanation": "60 ÷ 3 = 20."},
+  {"topic": "Lógica Matemática", "q": "Se A > B e B > C, então:", "options": ["C > A", "A > C", "A = C", "B < C"], "answer": 1, "explanation": "Pela transitividade, se A > B e B > C, então A > C."},
+  {"topic": "Lógica Matemática", "q": "Qual número não pertence ao grupo: 2, 4, 6, 8, 11?", "options": ["2", "6", "8", "11"], "answer": 3, "explanation": "2, 4, 6 e 8 são números pares; 11 é ímpar."},
+  {"topic": "Lógica Matemática", "q": "Qual número é primo?", "options": ["9", "15", "17", "21"], "answer": 2, "explanation": "17 tem apenas dois divisores positivos: 1 e ele mesmo."},
+  {"topic": "Lógica Matemática", "q": "Se 4 canetas custam 800 Kz, quanto custa cada uma?", "options": ["100 Kz", "150 Kz", "200 Kz", "250 Kz"], "answer": 2, "explanation": "800 ÷ 4 = 200 Kz."},
+  {"topic": "Lógica Matemática", "q": "Um produto custa 10.000 Kz e tem desconto de 10%. Qual será o preço final?", "options": ["8.000 Kz", "9.000 Kz", "9.500 Kz", "10.100 Kz"], "answer": 1, "explanation": "10% de 10.000 = 1.000; 10.000 − 1.000 = 9.000 Kz."},
+  {"topic": "Lógica Matemática", "q": "Qual é o próximo número: 1, 4, 9, 16, ___?", "options": ["20", "24", "25", "30"], "answer": 2, "explanation": "Quadrados perfeitos: 1², 2², 3², 4², 5² = 25."},
+  {"topic": "Lógica Matemática", "q": "Se 3 pessoas dividem igualmente 900 Kz, quanto recebe cada pessoa?", "options": ["200 Kz", "250 Kz", "300 Kz", "350 Kz"], "answer": 2, "explanation": "900 ÷ 3 = 300 Kz."},
+  {"topic": "Lógica Matemática", "q": "100 − 25 = ?", "options": ["65", "70", "75", "80"], "answer": 2, "explanation": "100 − 25 = 75."},
+  {"topic": "Lógica Matemática", "q": "9 × 9 = ?", "options": ["72", "81", "90", "99"], "answer": 1, "explanation": "9 × 9 = 81."},
+  {"topic": "Lógica Matemática", "q": "Qual é o próximo número: 10, 20, 30, ___, 50?", "options": ["35", "40", "45", "55"], "answer": 1, "explanation": "A sequência aumenta de 10 em 10."},
+  {"topic": "Lógica Matemática", "q": "Uma família tem 4 pessoas. Cada pessoa recebe 3 maçãs. Quantas maçãs são necessárias?", "options": ["7", "10", "12", "14"], "answer": 2, "explanation": "4 × 3 = 12."},
+  {"topic": "Lógica Matemática", "q": "Se 5 trabalhadores produzem 100 unidades, mantendo a mesma proporção, quantas unidades produzirão 10 trabalhadores?", "options": ["150", "200", "250", "300"], "answer": 1, "explanation": "Duplicando o número de trabalhadores, duplica a produção: 200."},
+  {"topic": "Lógica Matemática", "q": "Quanto é 3/4 de 100?", "options": ["25", "50", "75", "80"], "answer": 2, "explanation": "100 × 3/4 = 75."}
+];
+
+let gameQuestions=[], current=0, correct=0, player="", timerId=null, seconds=60, answered=false, penalty=0, helpUsed=false;
+
+function shuffle(a){return a.map(x=>({x,r:Math.random()})).sort((a,b)=>a.r-b.r).map(o=>o.x)}
+
+function startGame(){
+  player=document.getElementById('player').value.trim();
+  let mode=document.getElementById('mode').value;
+  if(!player){alert('Por favor, digite seu nome.');return;}
+  
+  let pool = mode==='todas' ? BANK : BANK.filter(x=>x.topic===mode);
+  gameQuestions=shuffle(pool);
+  current=0;correct=0;penalty=0;
+  
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+  showQuestion();
+}
+
+function showQuestion(){
+  clearInterval(timerId); seconds=60; answered=false; helpUsed=false;
+  const q=gameQuestions[current];
+  if(!q){ finish(); return; }
+  
+  document.getElementById('question').textContent = q.q;
+  document.getElementById('topic').textContent = q.topic;
+  document.getElementById('counter').textContent = `Questão ${current+1} de ${gameQuestions.length}`;
+  document.getElementById('bar').style.width=((current)/gameQuestions.length*100)+'%';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('mathBox').classList.add('hidden');
+  document.getElementById('mathBox').textContent='';
+  document.getElementById('skipBtn').disabled=false;
+  
+  const mh=document.getElementById('mathHelp');
+  if(q.explanation){mh.classList.remove('hidden');mh.disabled=false;}
+  else mh.classList.add('hidden');
+  
+  const box=document.getElementById('options');box.innerHTML='';
+  q.options.forEach((opt,i)=>{
+    const b=document.createElement('button');b.className='option';b.textContent=String.fromCharCode(65+i)+') '+opt;
+    b.onclick=()=>answer(i,b);box.appendChild(b);
+  });
+  
+  updateTimer();
+  timerId=setInterval(()=>{seconds--;updateTimer();if(seconds<=0){clearInterval(timerId);timeUp();}},1000);
+}
+
+function updateTimer(){document.getElementById('timer').textContent='00:'+String(seconds).padStart(2,'0');}
+
+function answer(i,btn){
+  if(answered)return;answered=true;clearInterval(timerId);
+  document.getElementById('skipBtn').disabled=true;
+  document.getElementById('mathHelp').disabled=true;
+  const q=gameQuestions[current];
+  const buttons=[...document.querySelectorAll('.option')];
+  
+  buttons.forEach((b,n)=>{b.disabled=true;if(n===q.answer)b.classList.add('correct')});
+  
+  if(i===q.answer){
+    correct++;
+    document.getElementById('feedback').innerHTML='<span class="good">✓ Resposta correta!</span>';
+  } else {
+    btn.classList.add('wrong');
+    document.getElementById('feedback').innerHTML='<span class="bad">✗ Resposta incorreta.</span>';
+  }
+  
+  if(q.explanation){
+    const mb=document.getElementById('mathBox');mb.classList.remove('hidden');
+    mb.innerHTML='<b>Explicação:</b> '+q.explanation;
+  }
+  setTimeout(nextQuestion, i===q.answer ? 800 : 2000);
+}
+
+function timeUp(){
+  if(answered)return;answered=true;
+  const q=gameQuestions[current];
+  [...document.querySelectorAll('.option')].forEach((b,n)=>{b.disabled=true;if(n===q.answer)b.classList.add('correct')});
+  document.getElementById('skipBtn').disabled=true;
+  document.getElementById('mathHelp').disabled=true;
+  document.getElementById('feedback').innerHTML='<span class="bad">⏱ Tempo esgotado.</span>';
+  if(q.explanation){
+    const mb=document.getElementById('mathBox');mb.classList.remove('hidden');
+    mb.innerHTML='<b>Explicação:</b> '+q.explanation;
+  }
+  setTimeout(nextQuestion,2000);
+}
+
+function nextQuestion(){if(current<gameQuestions.length-1){current++;showQuestion();}else finish();}
+
+function skipQuestion(){
+  if(answered)return;
+  clearInterval(timerId);answered=true;
+  document.getElementById('feedback').innerHTML='<span class="sub">⏭ Pergunta pulada.</span>';
+  setTimeout(nextQuestion,400);
+}
+
+function showMathHelp(){
+  if(answered || helpUsed)return;
+  const q=gameQuestions[current];
+  helpUsed=true; penalty+=0.75;
+  document.getElementById('mathHelp').disabled=true;
+  const mb=document.getElementById('mathBox');mb.classList.remove('hidden');
+  mb.innerHTML='<b>Explicação:</b> '+q.explanation+'<br><span class="bad"><b>-0,75 valores</b> descontados.</span>';
+}
+
+function finish(){
+  clearInterval(timerId);
+  let raw=(correct/gameQuestions.length*20);
+  let note=Math.max(0,raw-penalty);
+  document.getElementById('game').classList.add('hidden');
+  document.getElementById('result').classList.remove('hidden');
+  document.getElementById('resultName').textContent='Candidato: '+player;
+  document.getElementById('score').textContent=note.toFixed(2).replace('.',',')+' / 20 valores';
+  const approved=note>=10;
+  const st=document.getElementById('status');
+  st.textContent=approved?'APROVADO':'NÃO APROVADO';
+  st.className=approved?'approved':'failed';
+  document.getElementById('details').textContent=`Acertos: ${correct}/${gameQuestions.length} • Penalizações: -${penalty.toFixed(2).replace('.',',')} v.`;
+}
+</script>
+</body>
+</html>
