@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Exame para Técnico Médio de 3° Classe - Regime Geral GPL</title>
+<style>
+:root{--bg:#0f172a;--card:#fff;--ink:#172033;--muted:#64748b;--accent:#1d4ed8;--good:#15803d;--bad:#b91c1c;--gold:#ca8a04}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(135deg,#0f172a,#1e3a8a);color:var(--ink);min-height:100vh}
+.wrap{max-width:900px;margin:auto;padding:22px}.card{background:#fff;border-radius:18px;padding:26px;box-shadow:0 15px 45px #0005;margin:15px 0}
+h1{margin:0 0 8px;font-size:28px}h2{margin-top:0}.question-title{display:block;font-size:22px;line-height:1.45;margin:18px 0 14px;font-weight:800}.sub{color:var(--muted)}label{display:block;font-weight:bold;margin:16px 0 7px}input{width:100%;padding:14px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px}
+button{border:0;border-radius:10px;padding:13px 18px;font-size:16px;font-weight:bold;cursor:pointer;background:var(--accent);color:#fff;margin-top:12px}button:hover{filter:brightness(.94)}
+.hidden{display:none}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.pill{padding:8px 12px;border-radius:999px;background:#e2e8f0;font-size:13px;font-weight:bold}.timer{font-size:22px;color:#991b1b;font-weight:bold}.progress{height:10px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin:14px 0}.bar{height:100%;background:var(--accent);width:0;transition:.2s}
+.option{display:block;width:100%;text-align:left;background:#f8fafc;color:#172033;border:2px solid #e2e8f0;margin:10px 0;padding:15px;border-radius:12px}.option:hover{border-color:#93c5fd;background:#eff6ff}.option.correct{border-color:#16a34a;background:#dcfce7}.option.wrong{border-color:#dc2626;background:#fee2e2}.option:disabled{cursor:default}select{background:#fff}
+.feedback{font-weight:bold;margin-top:10px}.good{color:var(--good)}.bad{color:var(--bad)}
+.rank{width:100%;border-collapse:collapse;margin-top:12px}.rank th,.rank td{padding:10px;border-bottom:1px solid #e2e8f0;text-align:left}.rank th{background:#f1f5f9}.notice{padding:12px;border-radius:10px;background:#eff6ff;color:#1e3a8a;margin:10px 0}.math{margin-top:12px;background:#fff7ed;padding:12px;border-radius:10px;border-left:4px solid #f97316}
+.small{font-size:13px;color:var(--muted)}.center{text-align:center}.score{font-size:42px;font-weight:800}.approved{color:var(--good)}.failed{color:var(--bad)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div id="start" class="card">
+<h1>Exame para Técnico Médio de 3° Classe - Regime Geral GPL</h1>
+<p class="sub">Simulador offline • 60 perguntas na avaliação geral • 1 minuto por questão • Cotação: 20 valores</p>
+<div class="notice">A avaliação geral tem 60 perguntas. Também pode escolher uma categoria específica para treinar; a quantidade disponível depende do banco de questões dessa categoria.</div>
+<label for="player">Nome do jogador</label>
+<input id="player" maxlength="60" placeholder="Digite o seu nome">
+<label for="mode">Modo de jogo</label>
+<select id="mode" style="width:100%;padding:14px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px">
+<option value="geral">Avaliação Geral — 60 questões</option>
+<option value="Cultura Geral de Angola">Cultura Geral de Angola</option>
+<option value="Língua Portuguesa">Língua Portuguesa</option>
+<option value="Geografia de Angola">Geografia de Angola</option>
+<option value="História de Angola">História de Angola</option>
+<option value="Lógica Matemática">Lógica Matemática</option>
+<option value="Noções de Administração Pública de Angola">Noções de Administração Pública de Angola</option>
+</select>
+<button onclick="startGame()">Começar avaliação</button>
+<button onclick="showRanking()">Ver ranking</button>
+<p class="small">O ranking é guardado neste navegador através do armazenamento local. Funciona sem Internet.</p>
+</div>
+
+<div id="game" class="card hidden">
+<div class="top">
+<div><span class="pill" id="topic"></span> <span class="pill" id="counter"></span></div>
+<div class="timer" id="timer">01:00</div>
+</div>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<h2 id="question" class="question-title"></h2>
+<div id="options"></div>
+<div id="feedback"></div>
+<div id="mathBox" class="math hidden"></div>
+<div id="actions" style="display:flex;gap:10px;flex-wrap:wrap">
+<button id="mathHelp" class="hidden" onclick="showMathHelp()">Ver resolução e explicação (-0,75)</button>
+<button id="skipBtn" onclick="skipQuestion()">Pular pergunta</button>
+</div>
+</div>
+
+<div id="result" class="card hidden center">
+<h2>Resultado da avaliação</h2>
+<p id="resultName"></p>
+<div class="score" id="score"></div>
+<h2 id="status"></h2>
+<p id="details"></p>
+<button onclick="location.reload()">Nova avaliação</button>
+<button onclick="showRanking()">Ver ranking</button>
+</div>
+
+<div id="ranking" class="card hidden">
+<div class="top"><h2>🏆 Ranking dos Jogadores</h2><button onclick="hideRanking()">Voltar</button></div>
+<div class="notice">O ranking fica guardado neste dispositivo. Pode ser usado por várias pessoas no mesmo computador ou telemóvel.</div>
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+<button onclick="exportRanking()">Exportar ranking</button>
+<button onclick="document.getElementById('rankFile').click()">Importar ranking</button>
+<button onclick="clearRanking()" style="background:#b91c1c">Apagar ranking</button>
+<input id="rankFile" type="file" accept=".json" class="hidden" onchange="importRanking(event)">
+</div>
+<table class="rank"><thead><tr><th>#</th><th>Jogador</th><th>Modo</th><th>Nota</th><th>Acertos</th><th>Data</th></tr></thead><tbody id="rankBody"></tbody></table>
+<p class="small">Exportar/Importar permite levar o ranking para outro dispositivo. Os resultados podem ser ordenados pela maior nota.</p>
+</div>
+</div>
+
+<script>
+const BANK = [{"topic": "Cultura Geral de Angola", "q": "Quem foi António Agostinho Neto?", "options": ["Primeiro Presidente da República de Angola", "Primeiro Governador-Geral de Angola", "Primeiro Presidente da Assembleia Nacional", "Primeiro Presidente do Tribunal Supremo"], "answer": 0, "explanation": "Agostinho Neto foi o primeiro Presidente da República de Angola independente."}, {"topic": "Cultura Geral de Angola", "q": "Em que data nasceu Agostinho Neto?", "options": ["17 de Setembro de 1922", "11 de Novembro de 1922", "4 de Fevereiro de 1925", "17 de Setembro de 1925"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Qual destas obras está associada a Agostinho Neto?", "options": ["Sagrada Esperança", "Mayombe", "Os Transparentes", "Quem Me Dera Ser Onda"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Quem escreveu o romance Mayombe?", "options": ["Pepetela", "Agostinho Neto", "Manuel Rui", "António Jacinto"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Qual é o verdadeiro nome de Pepetela?", "options": ["Artur Carlos Maurício Pestana dos Santos", "José Vieira Mateus da Graça", "Manuel Rui Alves Monteiro", "António Agostinho Neto"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Quem escreveu Quem Me Dera Ser Onda?", "options": ["Manuel Rui", "Pepetela", "Agostinho Neto", "Ondjaki"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Quem escreveu Luuanda?", "options": ["José Luandino Vieira", "Pepetela", "Manuel Rui", "Agostinho Neto"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Quem escreveu Os Transparentes?", "options": ["Ondjaki", "Pepetela", "Manuel Rui", "Agostinho Neto"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Alda Lara destacou-se na cultura angolana como:", "options": ["Poeta e escritora", "Militar", "Governadora", "Economista"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Quem foi Óscar Ribas?", "options": ["Escritor e estudioso da cultura angolana", "Presidente da República", "Militar da independência", "Governador colonial"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Qual é o nome do hino nacional de Angola?", "options": ["Angola Avante", "Pátria Livre", "Angola Sempre", "Viva Angola"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Qual é a moeda oficial de Angola?", "options": ["Kwanza", "Escudo", "Dólar", "Franco"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Qual é a capital da República de Angola?", "options": ["Luanda", "Benguela", "Huambo", "Lubango"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Qual é a data da Independência Nacional de Angola?", "options": ["4 de Fevereiro de 1961", "11 de Novembro de 1975", "17 de Setembro de 1979", "4 de Abril de 2002"], "answer": 1, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "O Dia dos Heróis Nacionais é celebrado em:", "options": ["17 de Setembro", "11 de Novembro", "4 de Fevereiro", "4 de Abril"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Qual símbolo aparece no centro da bandeira de Angola?", "options": ["Uma catana, uma roda dentada e uma estrela", "Uma cruz e uma espada", "Um leão e uma estrela", "Uma árvore e um livro"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Qual género musical é fortemente associado à cultura urbana angolana?", "options": ["Semba", "Flamenco", "Fado", "Reggae jamaicano"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "O kuduro é:", "options": ["Um género musical e de dança angolano", "Uma língua nacional", "Uma província", "Uma religião"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Qual destas é uma língua nacional de Angola?", "options": ["Kimbundu", "Alemão", "Italiano", "Latim"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Qual destas também é uma língua nacional de Angola?", "options": ["Umbundu", "Francês", "Espanhol", "Latim"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Mbanza Kongo foi historicamente capital de:", "options": ["Reino do Kongo", "Reino do Ndongo", "Reino da Matamba", "Reino do Bailundo"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Quem foi a célebre rainha que governou os reinos do Ndongo e Matamba?", "options": ["Njinga Mbande", "Alda Lara", "Ana Joaquina", "Deolinda Rodrigues"], "answer": 0, "explanation": ""}, {"topic": "Língua Portuguesa", "q": "Qual é o plural de cidadão?", "options": ["Cidadões", "Cidadãos", "Cidadães", "Cidadans"], "answer": 1, "explanation": ""}, {"topic": "Língua Portuguesa", "q": "Qual é o plural de pão?", "options": ["Pãos", "Pães", "Pões", "Pans"], "answer": 1, "explanation": ""}, {"topic": "Língua Portuguesa", "q": "Na frase “O aluno estudou”, qual é o sujeito?", "options": ["Estudou", "O", "Aluno", "O aluno"], "answer": 3, "explanation": ""}, {"topic": "Língua Portuguesa", "q": "Na frase “Maria comprou um livro”, qual é o verbo?", "options": ["Maria", "Comprou", "Um", "Livro"], "answer": 1, "explanation": ""}, {"topic": "Língua Portuguesa", "q": "Qual destas palavras é um substantivo?", "options": ["Correr", "Bonito", "Casa", "Rapidamente"], "answer": 2, "explanation": ""}, {"topic": "Língua Portuguesa", "q": "Qual destas palavras é um verbo?", "options": ["Escola", "Estudar", "Bonito", "Rapidamente"], "answer": 1, "explanation": ""}, {"topic": "Língua Portuguesa", "q": "Qual destas palavras é um adjetivo?", "options": ["Casa", "Correr", "Bonito", "Ontem"], "answer": 2, "explanation": ""}, {"topic": "Língua Portuguesa", "q": "Qual é o antónimo de alto?", "options": ["Grande", "Baixo", "Largo", "Forte"], "answer": 1, "explanation": ""}, {"topic": "Língua Portuguesa", "q": "Qual é o sinónimo de feliz?", "options": ["Triste", "Alegre", "Zangado", "Fraco"], "answer": 1, "explanation": ""}, {"topic": "Língua Portuguesa", "q": "“Eu estudarei amanhã” está em que tempo verbal?", "options": ["Presente", "Pretérito perfeito", "Futuro", "Pretérito imperfeito"], "answer": 2, "explanation": ""}, {"topic": "Língua Portuguesa", "q": "Qual é o infinitivo de “comemos”?", "options": ["Comer", "Comar", "Comido", "Comendo"], "answer": 0, "explanation": ""}, {"topic": "Língua Portuguesa", "q": "Qual é o feminino de ator?", "options": ["Atora", "Atriz", "Actora", "Atriza"], "answer": 1, "explanation": ""}, {"topic": "Língua Portuguesa", "q": "Qual destas palavras está corretamente acentuada?", "options": ["Cafe", "Café", "Cafê", "Cáfe"], "answer": 1, "explanation": ""}, {"topic": "Língua Portuguesa", "q": "Qual destas frases está correta?", "options": ["Haviam muitas pessoas.", "Havia muitas pessoas.", "Havião muitas pessoas.", "Haviam muita pessoa."], "answer": 1, "explanation": ""}, {"topic": "Língua Portuguesa", "q": "Qual é a forma correta?", "options": ["À eles", "A eles", "Há eles", "Á eles"], "answer": 1, "explanation": ""}, {"topic": "Língua Portuguesa", "q": "Qual é a forma correta?", "options": ["Porque você faltou?", "Por que você faltou?", "Porquê você faltou?", "Por quê você faltou"], "answer": 1, "explanation": ""}, {"topic": "Língua Portuguesa", "q": "Qual é o coletivo de peixes?", "options": ["Alcateia", "Cardume", "Rebanho", "Manada"], "answer": 1, "explanation": ""}, {"topic": "Língua Portuguesa", "q": "Qual sinal indica uma pergunta?", "options": ["!", " .", "?", ";"], "answer": 2, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual é a capital de Angola?", "options": ["Benguela", "Huambo", "Luanda", "Lubango"], "answer": 2, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual oceano banha a costa de Angola?", "options": ["Índico", "Pacífico", "Atlântico", "Ártico"], "answer": 2, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual país faz fronteira com Angola a sul?", "options": ["Namíbia", "Congo", "Zâmbia", "Tanzânia"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual é o enclave angolano situado no norte do país?", "options": ["Cabinda", "Moxico", "Cuando", "Namibe"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual é um dos principais rios de Angola?", "options": ["Kwanza", "Nilo", "Danúbio", "Ganges"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual rio forma parte da fronteira entre Angola e Namíbia?", "options": ["Cunene", "Kwanza", "Cubango", "Cuito"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual é a capital da província da Huíla?", "options": ["Lubango", "Huambo", "Malanje", "Saurimo"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual é a capital do Bié?", "options": ["Kuito", "Luena", "Saurimo", "Dundo"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual é a capital da Lunda-Sul?", "options": ["Dundo", "Saurimo", "Luena", "Malanje"], "answer": 1, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual é a capital do Moxico?", "options": ["Luena", "Menongue", "Saurimo", "Kuito"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual é a capital do Namibe?", "options": ["Tombwa", "Moçâmedes", "Lubango", "Benguela"], "answer": 1, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual recurso mineral é especialmente importante nas Lundas?", "options": ["Diamante", "Petróleo", "Carvão", "Urânio"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual recurso natural tem grande importância económica em Cabinda?", "options": ["Petróleo", "Diamante", "Carvão", "Ouro"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "O deserto do Namibe encontra-se principalmente em que parte de Angola?", "options": ["Norte", "Centro", "Sul", "Nordeste"], "answer": 2, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual corrente marítima influencia o litoral sul de Angola?", "options": ["Corrente de Benguela", "Corrente do Golfo", "Corrente do Japão", "Corrente do Brasil"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual é uma importante atividade económica nas zonas costeiras de Angola?", "options": ["Pesca", "Criação de renas", "Produção de gelo", "Cultivo de trigo polar"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual porto é de grande importância em Angola?", "options": ["Porto do Lobito", "Porto de Luena", "Porto de Menongue", "Porto de Saurimo"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual é a capital da província do Uíge?", "options": ["Uíge", "Negage", "Mbanza Kongo", "Maquela do Zombo"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual é a capital da província do Zaire?", "options": ["Cabinda", "Mbanza Kongo", "Uíge", "Soyo"], "answer": 1, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual é a capital do Cuanza Sul?", "options": ["Sumbe", "Porto Amboim", "Gabela", "Quibala"], "answer": 0, "explanation": ""}, {"topic": "História de Angola", "q": "Em que data Angola proclamou a independência?", "options": ["4 de Fevereiro de 1961", "11 de Novembro de 1975", "25 de Abril de 1974", "17 de Setembro de 1979"], "answer": 1, "explanation": ""}, {"topic": "História de Angola", "q": "Quem proclamou a independência de Angola?", "options": ["Agostinho Neto", "Jonas Savimbi", "Holden Roberto", "José Eduardo dos Santos"], "answer": 0, "explanation": ""}, {"topic": "História de Angola", "q": "Quem foi o primeiro Presidente de Angola independente?", "options": ["José Eduardo dos Santos", "Agostinho Neto", "João Lourenço", "Holden Roberto"], "answer": 1, "explanation": ""}, {"topic": "História de Angola", "q": "O que ocorreu em 4 de Fevereiro de 1961?", "options": ["Levantamento contra o domínio colonial português", "Independência de Angola", "Assinatura dos Acordos de Bicesse", "Fim da guerra civil"], "answer": 0, "explanation": ""}, {"topic": "História de Angola", "q": "Quem foi Holden Roberto?", "options": ["Líder histórico da FNLA", "Primeiro Presidente de Angola", "Líder histórico da UNITA", "Presidente da República após 2002"], "answer": 0, "explanation": ""}, {"topic": "História de Angola", "q": "Quem liderou historicamente a UNITA?", "options": ["Holden Roberto", "Jonas Savimbi", "Agostinho Neto", "Mário Pinto de Andrade"], "answer": 1, "explanation": ""}, {"topic": "História de Angola", "q": "O que significa MPLA?", "options": ["Movimento Popular de Libertação de Angola", "Movimento Português de Libertação Africana", "Movimento Popular Livre Angolano", "Movimento Patriótico de Libertação Africana"], "answer": 0, "explanation": ""}, {"topic": "História de Angola", "q": "O que significa FNLA?", "options": ["Frente Nacional de Libertação de Angola", "Frente Nacional Livre de Angola", "Força Nacional de Libertação Africana", "Frente Nova de Libertação de Angola"], "answer": 0, "explanation": ""}, {"topic": "História de Angola", "q": "O que significa UNITA?", "options": ["União Nacional para a Independência Total de Angola", "União Nacional de Independência Territorial Africana", "União Nacional Independente de Todos os Angolanos", "União Nacional para a Integração Territorial de Angola"], "answer": 0, "explanation": ""}, {"topic": "História de Angola", "q": "Qual país colonizou Angola?", "options": ["França", "Portugal", "Inglaterra", "Bélgica"], "answer": 1, "explanation": ""}, {"topic": "História de Angola", "q": "Qual cidade foi capital do antigo Reino do Kongo?", "options": ["Luanda", "Mbanza Kongo", "Benguela", "Huambo"], "answer": 1, "explanation": ""}, {"topic": "História de Angola", "q": "Quem foi Njinga Mbande?", "options": ["Rainha dos reinos do Ndongo e Matamba", "Primeira Presidente de Angola", "Líder da FNLA", "Escritora angolana"], "answer": 0, "explanation": ""}, {"topic": "História de Angola", "q": "Em que ano ocorreu o levantamento de 4 de Fevereiro?", "options": ["1956", "1961", "1974", "1975"], "answer": 1, "explanation": ""}, {"topic": "História de Angola", "q": "Quem fundou a cidade de Luanda no século XVI?", "options": ["Paulo Dias de Novais", "Diogo Cão", "Vasco da Gama", "Fernão de Magalhães"], "answer": 0, "explanation": ""}, {"topic": "História de Angola", "q": "Em que anos ocorreu a Conferência de Berlim?", "options": ["1884–1885", "1900–1901", "1914–1918", "1945–1946"], "answer": 0, "explanation": ""}, {"topic": "História de Angola", "q": "Em que ano foi assinado o Acordo de Alvor?", "options": ["1961", "1974", "1975", "1991"], "answer": 1, "explanation": ""}, {"topic": "História de Angola", "q": "Os Acordos de Bicesse foram assinados em:", "options": ["1975", "1985", "1991", "2002"], "answer": 2, "explanation": ""}, {"topic": "História de Angola", "q": "Em que ano foi assinado o Protocolo de Lusaka?", "options": ["1991", "1994", "1998", "2002"], "answer": 1, "explanation": ""}, {"topic": "História de Angola", "q": "Em que ano morreu Jonas Savimbi?", "options": ["1991", "1994", "2002", "2010"], "answer": 2, "explanation": ""}, {"topic": "História de Angola", "q": "Em que ano terminou oficialmente a guerra civil angolana?", "options": ["1991", "1994", "2002", "2010"], "answer": 2, "explanation": ""}, {"topic": "Lógica Matemática", "q": "Qual é o próximo número da sequência: 2, 4, 6, 8, ___?", "options": ["9", "10", "11", "12"], "answer": 1, "explanation": "A sequência aumenta de 2 em 2: 2, 4, 6, 8, 10."}, {"topic": "Lógica Matemática", "q": "15 + 27 = ?", "options": ["40", "41", "42", "43"], "answer": 2, "explanation": "15 + 27 = 42."}, {"topic": "Lógica Matemática", "q": "75 − 28 = ?", "options": ["47", "48", "49", "50"], "answer": 0, "explanation": "75 − 28 = 47."}, {"topic": "Lógica Matemática", "q": "8 × 7 = ?", "options": ["54", "56", "58", "64"], "answer": 1, "explanation": "8 × 7 = 56."}, {"topic": "Lógica Matemática", "q": "144 ÷ 12 = ?", "options": ["10", "11", "12", "14"], "answer": 2, "explanation": "144 ÷ 12 = 12."}, {"topic": "Lógica Matemática", "q": "Qual é o próximo número: 3, 6, 9, 12, ___?", "options": ["13", "14", "15", "16"], "answer": 2, "explanation": "A sequência aumenta de 3 em 3."}, {"topic": "Lógica Matemática", "q": "Qual é o próximo número: 5, 10, 20, 40, ___?", "options": ["50", "60", "70", "80"], "answer": 3, "explanation": "Cada número é multiplicado por 2."}, {"topic": "Lógica Matemática", "q": "Quanto é 25% de 200?", "options": ["25", "40", "50", "75"], "answer": 2, "explanation": "25% = 25/100; 200 × 0,25 = 50."}, {"topic": "Lógica Matemática", "q": "Quanto é 50% de 80?", "options": ["20", "30", "40", "50"], "answer": 2, "explanation": "50% é metade: 80 ÷ 2 = 40."}, {"topic": "Lógica Matemática", "q": "Quanto é 10% de 500?", "options": ["5", "25", "50", "100"], "answer": 2, "explanation": "10% de 500 = 500 × 0,10 = 50."}, {"topic": "Lógica Matemática", "q": "Qual é o dobro de 25?", "options": ["40", "45", "50", "55"], "answer": 2, "explanation": "25 × 2 = 50."}, {"topic": "Lógica Matemática", "q": "Qual é o triplo de 12?", "options": ["24", "30", "36", "40"], "answer": 2, "explanation": "12 × 3 = 36."}, {"topic": "Lógica Matemática", "q": "Qual é a metade de 90?", "options": ["40", "45", "50", "55"], "answer": 1, "explanation": "90 ÷ 2 = 45."}, {"topic": "Lógica Matemática", "q": "Qual é a terça parte de 60?", "options": ["10", "15", "20", "30"], "answer": 2, "explanation": "60 ÷ 3 = 20."}, {"topic": "Lógica Matemática", "q": "Se A > B e B > C, então:", "options": ["C > A", "A > C", "A = C", "B < C"], "answer": 1, "explanation": "Pela transitividade, se A > B e B > C, então A > C."}, {"topic": "Lógica Matemática", "q": "Qual número não pertence ao grupo: 2, 4, 6, 8, 11?", "options": ["2", "6", "8", "11"], "answer": 3, "explanation": "2, 4, 6 e 8 são pares; 11 é ímpar."}, {"topic": "Lógica Matemática", "q": "Qual número é primo?", "options": ["9", "15", "17", "21"], "answer": 2, "explanation": "17 tem apenas dois divisores positivos: 1 e 17."}, {"topic": "Lógica Matemática", "q": "Se 4 canetas custam 800 Kz, quanto custa cada uma?", "options": ["100 Kz", "150 Kz", "200 Kz", "250 Kz"], "answer": 2, "explanation": "800 ÷ 4 = 200 Kz."}, {"topic": "Lógica Matemática", "q": "Um produto custa 10.000 Kz e tem desconto de 10%. Qual será o preço final?", "options": ["8.000 Kz", "9.000 Kz", "9.500 Kz", "10.100 Kz"], "answer": 1, "explanation": "10% de 10.000 = 1.000; 10.000 − 1.000 = 9.000 Kz."}, {"topic": "Lógica Matemática", "q": "Qual é o próximo número: 1, 4, 9, 16, ___?", "options": ["20", "24", "25", "30"], "answer": 2, "explanation": "São quadrados perfeitos: 1², 2², 3², 4², 5² = 25."}, {"topic": "Lógica Matemática", "q": "Se 3 pessoas dividem igualmente 900 Kz, quanto recebe cada pessoa?", "options": ["200 Kz", "250 Kz", "300 Kz", "350 Kz"], "answer": 2, "explanation": "900 ÷ 3 = 300 Kz."}, {"topic": "Noções de Administração Pública de Angola", "q": "O que se entende por Administração Pública?", "options": ["Conjunto de órgãos, serviços e agentes destinados à prossecução do interesse público", "Conjunto de empresas privadas", "Conjunto de partidos políticos", "Conjunto de organizações religiosas"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "A Administração Pública deve prosseguir principalmente:", "options": ["O interesse público", "Interesses familiares", "Interesses comerciais privados", "Interesses pessoais dos funcionários"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "Qual destes é um princípio fundamental da Administração Pública?", "options": ["Legalidade", "Favoritismo", "Nepotismo", "Arbitrariedade"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "O princípio da legalidade significa que a Administração Pública deve:", "options": ["Atuar de acordo com a Constituição e a lei", "Atuar conforme interesses pessoais", "Ignorar os regulamentos", "Agir sem limites legais"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "O princípio da igualdade exige que:", "options": ["Os cidadãos sejam tratados de forma justa e não discriminatória", "Os funcionários tenham sempre prioridade", "Os familiares tenham privilégios", "Os cidadãos sejam tratados de forma diferente sem fundamento legal"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "O princípio da imparcialidade significa que o agente público deve:", "options": ["Atuar sem favorecimentos indevidos", "Favorecer familiares", "Beneficiar amigos", "Atender apenas pessoas conhecidas"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "O princípio da probidade está relacionado com:", "options": ["Honestidade e integridade", "Corrupção", "Nepotismo", "Favoritismo"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "O que é desconcentração administrativa?", "options": ["Distribuição de competências dentro da própria Administração", "Privatização dos serviços públicos", "Extinção dos órgãos públicos", "Transferência de todos os serviços para empresas privadas"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "O que é descentralização administrativa?", "options": ["Transferência de competências para entidades com autonomia nos termos da lei", "Concentração de todas as competências num único órgão", "Extinção das administrações locais", "Eliminação das províncias"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "Um dos objetivos da Administração Pública é:", "options": ["Aproximar os serviços das populações", "Afastar os serviços das populações", "Impedir o acesso dos cidadãos", "Eliminar os serviços locais"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "A simplificação administrativa procura:", "options": ["Tornar os procedimentos mais simples e eficientes", "Aumentar a burocracia desnecessária", "Impedir o atendimento público", "Eliminar os direitos dos cidadãos"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "Qual é o principal instrumento jurídico que estabelece os princípios fundamentais do Estado angolano?", "options": ["Constituição da República de Angola", "Código Comercial", "Código Penal", "Regulamento Municipal"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "Quem é o Titular do Poder Executivo em Angola?", "options": ["Presidente da República", "Presidente da Assembleia Nacional", "Presidente do Tribunal Supremo", "Governador Provincial"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "Qual órgão exerce o poder legislativo em Angola?", "options": ["Assembleia Nacional", "Tribunal Supremo", "Governo Provincial", "Administração Municipal"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "Quem exerce o poder judicial?", "options": ["Tribunais", "Assembleia Nacional", "Governo", "Governos Provinciais"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "Qual é uma das funções da Administração Pública?", "options": ["Prestar serviços públicos", "Exercer exclusivamente atividades partidárias", "Administrar empresas privadas", "Elaborar sentenças judiciais"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "Quem representa a Administração Central do Estado na província?", "options": ["Governador Provincial", "Administrador Municipal", "Presidente da Assembleia Nacional", "Juiz Presidente"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "O Governador Provincial é nomeado por:", "options": ["Presidente da República", "Assembleia Municipal", "Tribunal Supremo", "Administrador Municipal"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "O Administrador Municipal dirige:", "options": ["A Administração Municipal", "A Assembleia Nacional", "O Tribunal Supremo", "Um ministério nacional"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "O funcionário público deve colocar os seus conhecimentos e competências ao serviço:", "options": ["Do interesse público", "Da sua família", "Dos seus amigos", "De empresas privadas"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "O que é nepotismo?", "options": ["Favorecimento de familiares no exercício de funções ou atribuição de benefícios", "Fiscalização dos serviços públicos", "Atendimento ao cidadão", "Prestação de contas"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "A transparência na Administração Pública está relacionada com:", "options": ["Clareza e acesso à informação nos termos da lei", "Ocultação de todos os atos públicos", "Proibição de fiscalização", "Ausência de prestação de contas"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "A prestação de contas significa:", "options": ["Apresentar e justificar a utilização de recursos e o exercício de funções", "Ocultar informações", "Impedir auditorias", "Evitar fiscalização"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "O princípio da continuidade do serviço público significa que:", "options": ["Os serviços públicos devem funcionar de forma regular, nos termos da lei", "Os serviços devem funcionar apenas quando houver interesse dos funcionários", "Os serviços devem ser interrompidos frequentemente", "Os serviços devem funcionar apenas na capital"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "Qual é a finalidade essencial da Administração Pública?", "options": ["Prosseguir o interesse público, respeitando a Constituição, a lei e os direitos dos cidadãos", "Favorecer os funcionários públicos", "Beneficiar exclusivamente empresas privadas", "Concentrar todos os recursos públicos numa única instituição"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Em que cidade Agostinho Neto faleceu?", "options": ["Luanda", "Lisboa", "Moscovo", "Havana"], "answer": 2, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Quem foi Viriato da Cruz?", "options": ["Poeta e intelectual angolano", "Governador colonial", "Médico militar", "Economista"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "António Jacinto destacou-se principalmente como:", "options": ["Poeta e escritor angolano", "Governador colonial", "Cientista", "Engenheiro"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Mário Pinto de Andrade destacou-se como:", "options": ["Intelectual e nacionalista angolano", "Governador provincial", "Empresário", "Médico militar"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Qual destes escritores é conhecido pela obra Mayombe?", "options": ["Pepetela", "Manuel Rui", "Ondjaki", "Óscar Ribas"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "O vermelho da bandeira de Angola está associado, entre outros significados, a:", "options": ["Sangue derramado na luta pela independência", "Riqueza mineral exclusivamente", "Agricultura", "Água"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "O preto da bandeira nacional representa:", "options": ["O continente africano", "O oceano Atlântico", "A agricultura", "A indústria"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "A roda dentada presente no emblema nacional simboliza principalmente:", "options": ["A classe operária e o trabalho", "A agricultura", "O mar", "A religião"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "A catana presente no emblema nacional está relacionada com:", "options": ["Os camponeses e a luta", "A navegação", "O comércio marítimo", "A medicina"], "answer": 0, "explanation": ""}, {"topic": "Cultura Geral de Angola", "q": "Qual local de Angola foi reconhecido como Património Mundial pela UNESCO?", "options": ["Mbanza Kongo", "Lobito", "Luena", "Menongue"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual é a capital do Bengo?", "options": ["Caxito", "Dande", "Ambriz", "Barra do Dande"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual é a capital do Cunene?", "options": ["Ondjiva", "Xangongo", "Cahama", "Namacunde"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual é a capital do Cuanza Norte?", "options": ["Ndalatando", "Dondo", "Lucala", "Cazengo"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual destas províncias está localizada no extremo sul de Angola?", "options": ["Cabinda", "Cunene", "Uíge", "Zaire"], "answer": 1, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual destas províncias está localizada no norte de Angola?", "options": ["Cabinda", "Namibe", "Cunene", "Cuando"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual atividade económica é importante no planalto central de Angola?", "options": ["Agricultura", "Pesca marítima exclusivamente", "Exploração de gelo", "Navegação oceânica"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual província é historicamente conhecida pela produção de café?", "options": ["Uíge", "Namibe", "Cunene", "Cuando"], "answer": 0, "explanation": ""}, {"topic": "Geografia de Angola", "q": "Qual província é particularmente conhecida pela produção de diamantes?", "options": ["Lunda-Norte", "Namibe", "Bengo", "Cunene"], "answer": 0, "explanation": ""}, {"topic": "História de Angola", "q": "Quem sucedeu Agostinho Neto na Presidência da República?", "options": ["José Eduardo dos Santos", "Jonas Savimbi", "Holden Roberto", "João Lourenço"], "answer": 0, "explanation": ""}, {"topic": "História de Angola", "q": "Quem sucedeu José Eduardo dos Santos na Presidência da República?", "options": ["João Lourenço", "Bornito de Sousa", "Fernando da Piedade Dias dos Santos", "Adalberto Costa Júnior"], "answer": 0, "explanation": ""}, {"topic": "História de Angola", "q": "João Lourenço assumiu a Presidência da República em:", "options": ["2002", "2012", "2017", "2022"], "answer": 2, "explanation": ""}, {"topic": "História de Angola", "q": "Angola tornou-se membro da ONU em:", "options": ["1975", "1976", "1980", "1991"], "answer": 1, "explanation": ""}, {"topic": "História de Angola", "q": "Qual foi um dos principais objetivos da luta de libertação nacional?", "options": ["Conquistar a independência", "Reforçar o colonialismo", "Dividir Angola entre potências europeias", "Impedir a formação de um Estado angolano"], "answer": 0, "explanation": ""}, {"topic": "Lógica Matemática", "q": "100 − 25 = ?", "options": ["65", "70", "75", "80"], "answer": 2, "explanation": "100 − 25 = 75."}, {"topic": "Lógica Matemática", "q": "9 × 9 = ?", "options": ["72", "81", "90", "99"], "answer": 1, "explanation": "9 × 9 = 81."}, {"topic": "Lógica Matemática", "q": "Qual é o próximo número: 10, 20, 30, ___, 50?", "options": ["35", "40", "45", "55"], "answer": 1, "explanation": "A sequência aumenta de 10 em 10."}, {"topic": "Lógica Matemática", "q": "Uma família tem 4 pessoas. Cada pessoa recebe 3 maçãs. Quantas maçãs são necessárias?", "options": ["7", "10", "12", "14"], "answer": 2, "explanation": "4 × 3 = 12."}, {"topic": "Lógica Matemática", "q": "Se 5 trabalhadores produzem 100 unidades, mantendo a mesma proporção, quantas unidades produzirão 10 trabalhadores?", "options": ["150", "200", "250", "300"], "answer": 1, "explanation": "Duplicando o número de trabalhadores, duplica a produção: 200."}, {"topic": "Lógica Matemática", "q": "Quanto é 3/4 de 100?", "options": ["25", "50", "75", "80"], "answer": 2, "explanation": "100 × 3/4 = 75."}, {"topic": "Noções de Administração Pública de Angola", "q": "O princípio da igualdade exige que:", "options": ["Os cidadãos sejam tratados de forma justa e não discriminatória", "Os funcionários tenham sempre prioridade", "Os familiares tenham privilégios", "Os cidadãos sejam tratados de forma diferente sem fundamento legal"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "A Administração Pública deve respeitar:", "options": ["Os direitos e interesses legalmente protegidos dos cidadãos", "Apenas os interesses dos funcionários", "Apenas os interesses do Governo", "Apenas os interesses das empresas"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "O uso de um veículo oficial para fins exclusivamente pessoais pode representar:", "options": ["Uso indevido de bem público", "Boa administração", "Transparência", "Eficiência administrativa"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "O que é competência administrativa?", "options": ["Poder legalmente atribuído a um órgão ou agente para praticar determinados atos", "Poder pessoal ilimitado", "Direito de desobedecer à lei", "Privilégio familiar"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "A hierarquia administrativa corresponde a:", "options": ["Relação de autoridade e subordinação entre órgãos ou agentes", "Relação familiar", "Relação religiosa", "Relação comercial"], "answer": 0, "explanation": ""}, {"topic": "Noções de Administração Pública de Angola", "q": "A corrupção prejudica principalmente:", "options": ["A confiança nas instituições e o interesse público", "A transparência", "A legalidade", "A boa governação"], "answer": 0, "explanation": ""}];
+let gameQuestions=[], current=0, correct=0, player="", timerId=null, seconds=60, answered=false, penalty=0, helpUsed=false, mode='geral';
+
+function shuffle(a){return a.map(x=>({x,r:Math.random()})).sort((a,b)=>a.r-b.r).map(o=>o.x)}
+function startGame(){
+ player=document.getElementById('player').value.trim();
+ mode=document.getElementById('mode').value;
+ if(!player){alert('Digite o nome do jogador antes de começar.');return;}
+ let pool = mode==='geral' ? BANK : BANK.filter(x=>x.topic===mode);
+ if(pool.length<60 && mode==='geral') pool=BANK;
+ if(pool.length===0){alert('Não existem questões disponíveis para esta categoria.');return;}
+ gameQuestions=shuffle(pool).slice(0, Math.min(60,pool.length));
+ current=0;correct=0;penalty=0;
+ document.getElementById('start').classList.add('hidden');
+ document.getElementById('ranking').classList.add('hidden');
+ document.getElementById('game').classList.remove('hidden');
+ showQuestion();
+}
+function showQuestion(){
+ clearInterval(timerId); seconds=60; answered=false; helpUsed=false;
+ const q=gameQuestions[current];
+ if(!q){ finish(); return; }
+ const questionEl=document.getElementById('question');
+ questionEl.textContent = String(q.q || 'Questão indisponível');
+ document.getElementById('topic').textContent=q.topic;
+ document.getElementById('counter').textContent=`Questão ${current+1} de ${gameQuestions.length}`;
+ document.getElementById('bar').style.width=((current)/gameQuestions.length*100)+'%';
+ document.getElementById('feedback').textContent='';
+ document.getElementById('mathBox').classList.add('hidden');
+ document.getElementById('mathBox').textContent='';
+ document.getElementById('skipBtn').disabled=false;
+ const mh=document.getElementById('mathHelp');
+ if(q.topic==='Lógica Matemática' && q.explanation){mh.classList.remove('hidden');mh.disabled=false;mh.textContent='Ver resolução e explicação (-0,75)';}
+ else mh.classList.add('hidden');
+ const box=document.getElementById('options');box.innerHTML='';
+ q.options.forEach((opt,i)=>{
+   const b=document.createElement('button');b.className='option';b.textContent=String.fromCharCode(65+i)+') '+opt;
+   b.onclick=()=>answer(i,b);box.appendChild(b);
+ });
+ updateTimer();
+ timerId=setInterval(()=>{seconds--;updateTimer();if(seconds<=0){clearInterval(timerId);timeUp();}},1000);
+}
+function updateTimer(){document.getElementById('timer').textContent='00:'+String(seconds).padStart(2,'0');}
+function answer(i,btn){
+ if(answered)return;answered=true;clearInterval(timerId);
+ document.getElementById('skipBtn').disabled=true;
+ document.getElementById('mathHelp').disabled=true;
+ const q=gameQuestions[current], buttons=[...document.querySelectorAll('.option')];
+ buttons.forEach((b,n)=>{b.disabled=true;if(n===q.answer)b.classList.add('correct')});
+ if(i===q.answer){correct++;document.getElementById('feedback').innerHTML='<span class="good">✓ Resposta correta!</span>';}
+ else{btn.classList.add('wrong');document.getElementById('feedback').innerHTML='<span class="bad">✗ Resposta incorreta.</span>';}
+ if(q.topic==='Lógica Matemática' && q.explanation){
+   const mb=document.getElementById('mathBox');mb.classList.remove('hidden');mb.innerHTML='<b>Resolução e explicação:</b> '+q.explanation;
+ }
+ setTimeout(nextQuestion, i===q.answer ? 650 : 1800);
+}
+function timeUp(){
+ if(answered)return;answered=true;
+ const q=gameQuestions[current];
+ [...document.querySelectorAll('.option')].forEach((b,n)=>{b.disabled=true;if(n===q.answer)b.classList.add('correct')});
+ document.getElementById('skipBtn').disabled=true;
+ document.getElementById('mathHelp').disabled=true;
+ document.getElementById('feedback').innerHTML='<span class="bad">⏱ Tempo esgotado.</span>';
+ if(q.topic==='Lógica Matemática' && q.explanation){
+   const mb=document.getElementById('mathBox');mb.classList.remove('hidden');mb.innerHTML='<b>Resolução e explicação:</b> '+q.explanation;
+ }
+ setTimeout(nextQuestion,1800);
+}
+function nextQuestion(){if(current<gameQuestions.length-1){current++;showQuestion();}else finish();}
+function skipQuestion(){
+ if(answered)return;
+ clearInterval(timerId);answered=true;
+ document.getElementById('skipBtn').disabled=true;
+ document.getElementById('mathHelp').disabled=true;
+ document.getElementById('feedback').innerHTML='<span class="sub">⏭ Pergunta pulada.</span>';
+ setTimeout(nextQuestion,400);
+}
+function showMathHelp(){
+ if(answered || helpUsed)return;
+ const q=gameQuestions[current];
+ if(q.topic!=='Lógica Matemática' || !q.explanation)return;
+ helpUsed=true; penalty+=0.75;
+ document.getElementById('mathHelp').disabled=true;
+ const mb=document.getElementById('mathBox');mb.classList.remove('hidden');
+ mb.innerHTML='<b>Resolução e explicação:</b> '+q.explanation+'<br><span class="bad"><b>-0,75 valores</b> descontados por consultar a resolução.</span>';
+}
+function finish(){
+ clearInterval(timerId);
+ let raw=(correct/gameQuestions.length*20);
+ let note=Math.max(0,raw-penalty);
+ document.getElementById('game').classList.add('hidden');
+ document.getElementById('result').classList.remove('hidden');
+ document.getElementById('resultName').textContent='Jogador: '+player+' • Modo: '+(mode==='geral'?'Avaliação Geral':mode);
+ document.getElementById('score').textContent=note.toFixed(2).replace('.',',')+' / 20 valores';
+ const approved=note>=15;
+ const st=document.getElementById('status');st.textContent=approved?'APROVADO':'NÃO APROVADO';st.className=approved?'approved':'failed';
+ document.getElementById('details').textContent=`Acertos: ${correct}/${gameQuestions.length} • Penalização: ${penalty.toFixed(2).replace('.',',')} • Nota antes da penalização: ${raw.toFixed(2).replace('.',',')}`;
+ saveResult(note);
+}
+function saveResult(note){
+ let r=getRanking();
+ r.push({id:Date.now()+Math.random(),name:player,score:note,correct,total:gameQuestions.length,date:new Date().toLocaleString('pt-PT'),mode:mode,penalty:penalty});
+ r.sort((a,b)=>Number(b.score)-Number(a.score)||Number(b.correct)-Number(a.correct));
+ setRanking(r.slice(0,100));
+}
+function getRanking(){
+ try{return JSON.parse(localStorage.getItem('gplRanking')||'[]');}
+ catch(e){return [];}
+}
+function setRanking(r){
+ localStorage.setItem('gplRanking',JSON.stringify(r));
+}
+function clearRanking(){
+ if(confirm('Tem certeza que deseja apagar todo o ranking deste dispositivo?')){
+   localStorage.removeItem('gplRanking'); showRanking();
+ }
+}
+function exportRanking(){
+ const data=JSON.stringify(getRanking(),null,2);
+ const blob=new Blob([data],{type:'application/json'});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');a.href=url;a.download='ranking_exame_GPL.json';
+ document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+function importRanking(event){
+ const file=event.target.files[0]; if(!file)return;
+ const reader=new FileReader();
+ reader.onload=function(){
+   try{
+     const incoming=JSON.parse(reader.result);
+     if(!Array.isArray(incoming))throw new Error('Formato inválido');
+     const current=getRanking();
+     const merged=[...current,...incoming];
+     const seen=new Set();
+     const unique=merged.filter(x=>{
+       const key=x.id || [x.name,x.date,x.score,x.mode].join('|');
+       if(seen.has(key))return false; seen.add(key); return true;
+     });
+     unique.sort((a,b)=>Number(b.score)-Number(a.score)||Number(b.correct)-Number(a.correct));
+     setRanking(unique.slice(0,100));
+     showRanking();
+     alert('Ranking importado com sucesso.');
+   }catch(e){alert('Não foi possível importar este arquivo de ranking.');}
+ };
+ reader.readAsText(file);
+ event.target.value='';
+}
+
+function showRanking(){
+ document.getElementById('start').classList.add('hidden');
+ document.getElementById('game').classList.add('hidden');
+ document.getElementById('result').classList.add('hidden');
+ document.getElementById('ranking').classList.remove('hidden');
+ const r=getRanking().sort((a,b)=>Number(b.score)-Number(a.score)||Number(b.correct)-Number(a.correct));
+ setRanking(r);
+ const body=document.getElementById('rankBody');
+ body.innerHTML='';
+ if(!r.length){body.innerHTML='<tr><td colspan="6">Ainda não existem resultados.</td></tr>';return;}
+ r.forEach((x,i)=>{
+   const tr=document.createElement('tr');
+   tr.innerHTML=`<td>${i+1}</td><td>${escapeHtml(x.name||'')}</td><td>${escapeHtml(x.mode==='geral'?'Avaliação Geral':(x.mode||'Geral'))}</td><td>${Number(x.score||0).toFixed(2).replace('.',',')}</td><td>${x.correct||0}/${x.total||60}</td><td>${escapeHtml(x.date||'')}</td>`;
+   body.appendChild(tr);
+ });
+}
+function hideRanking(){document.getElementById('ranking').classList.add('hidden');document.getElementById('start').classList.remove('hidden');}
+function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+</script>
+</body>
+</html>
