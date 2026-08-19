@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulado Interativo: Administração Pública em Angola</title>
+    <style>
+        :root {
+            --primary: #1a365d;
+            --primary-light: #2b6cb0;
+            --accent: #c53030;
+            --accent-gold: #d69e2e;
+            --bg: #f7fafc;
+            --card-bg: #ffffff;
+            --text: #2d3748;
+            --text-muted: #718096;
+            --correct: #2f855a;
+            --correct-bg: #f0fff4;
+            --correct-border: #9ae6b4;
+            --incorrect: #c53030;
+            --incorrect-bg: #fff5f5;
+            --incorrect-border: #feb2b2;
+            --border: #e2e8f0;
+            --shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 20px 15px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 800px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: var(--shadow);
+            border-top: 6px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 20px;
+        }
+
+        .header-title-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .badge-total {
+            background: #ebf8ff;
+            color: var(--primary-light);
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid #bee3f8;
+        }
+
+        .filter-section {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-section label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background-color: #fff;
+            color: var(--text);
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .progress-container {
+            margin-top: 15px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            background-color: var(--border);
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--accent);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-card {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .module-tag {
+            align-self: flex-start;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: #edf2f7;
+            color: #4a5568;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #1a202c;
+            line-height: 1.5;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: #ffffff;
+            border: 2px solid var(--border);
+            padding: 14px 18px;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            line-height: 1.4;
+        }
+
+        .option-letter {
+            font-weight: 700;
+            color: var(--primary-light);
+            background: #ebf8ff;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.85rem;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary-light);
+            background-color: #f7fafc;
+        }
+
+        .option-btn:disabled {
+            cursor: default;
+        }
+
+        .option-btn.selected-correct {
+            background-color: var(--correct-bg);
+            border-color: var(--correct);
+            color: var(--correct);
+            font-weight: 600;
+        }
+
+        .option-btn.selected-correct .option-letter {
+            background-color: var(--correct);
+            color: white;
+        }
+
+        .option-btn.selected-incorrect {
+            background-color: var(--incorrect-bg);
+            border-color: var(--incorrect);
+            color: var(--incorrect);
+        }
+
+        .option-btn.selected-incorrect .option-letter {
+            background-color: var(--incorrect);
+            color: white;
+        }
+
+        .feedback-box {
+            padding: 16px;
+            border-radius: 8px;
+            display: none;
+            font-size: 0.92rem;
+            line-height: 1.5;
+            margin-top: 10px;
+        }
+
+        .feedback-box.correct {
+            background-color: var(--correct-bg);
+            border: 1px solid var(--correct-border);
+            color: #1c4532;
+        }
+
+        .feedback-box.incorrect {
+            background-color: var(--incorrect-bg);
+            border: 1px solid var(--incorrect-border);
+            color: #742a2a;
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-light);
+        }
+
+        .btn-secondary {
+            background-color: #edf2f7;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
+
+        .results-container {
+            display: none;
+            text-align: center;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .score-circle {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: #ebf8ff;
+            border: 6px solid var(--primary-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        .score-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .score-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .results-summary {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .results-summary h3 {
+            color: var(--primary);
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            padding: 6px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 600px) {
+            .app-container {
+                padding: 20px 15px;
+            }
+            .question-text {
+                font-size: 1.05rem;
+            }
+            .action-bar {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <div class="header-title-container">
+            <h1>Simulado de Administração Pública - Angola</h1>
+            <span class="badge-total" id="questions-count-badge">60 Questões</span>
+        </div>
+        
+        <div class="filter-section">
+            <label for="module-select">Filtrar por Módulo:</label>
+            <select id="module-select" onchange="filterQuestions()">
+                <option value="all">Todos os Módulos (60 Questões)</option>
+                <option value="I">Módulo I: Organização do Estado e CRA</option>
+                <option value="II">Módulo II: Administração Local (Lei 15/16)</option>
+                <option value="III">Módulo III: Função Pública (Lei 26/22 & Dec. 24/91)</option>
+                <option value="IV">Módulo IV: Procedimento Administrativo (Lei 31/22 CPA)</option>
+                <option value="V">Módulo V: Ética, Deontologia e Integridade</option>
+                <option value="VI">Módulo VI: Gestão Pública, Políticas e Eficiência</option>
+            </select>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-info">
+                <span id="progress-text">Questão 1 de 60</span>
+                <span id="progress-percent">0%</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-bar"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ÁREA DA PERGUNTA -->
+    <div id="quiz-area" class="question-card">
+        <div class="module-tag" id="module-tag">MÓDULO I</div>
+        <div class="question-text" id="question-text">Carregando pergunta...</div>
+
+        <div class="options-list" id="options-container">
+            <!-- Opções inseridas dinamicamente -->
+        </div>
+
+        <div class="feedback-box" id="feedback-box">
+            <div class="feedback-title" id="feedback-title"></div>
+            <div id="feedback-text"></div>
+        </div>
+
+        <div class="action-bar">
+            <button class="btn btn-secondary" id="prev-btn" onclick="prevQuestion()" disabled>Anterior</button>
+            <button class="btn" id="next-btn" onclick="nextQuestion()" disabled>Próxima Questão</button>
+        </div>
+    </div>
+
+    <!-- ÁREA DE RESULTADOS -->
+    <div id="results-area" class="results-container">
+        <h2>Simulado Concluído!</h2>
+        <div class="score-circle">
+            <span class="score-number" id="final-score-percent">0%</span>
+            <span class="score-label">Aproveitamento</span>
+        </div>
+
+        <div class="results-summary">
+            <h3>Resumo do Desempenho</h3>
+            <div class="summary-item">
+                <span>Total de Questões Respondidas:</span>
+                <strong id="res-total">60</strong>
+            </div>
+            <div class="summary-item">
+                <span>Respostas Corretas:</span>
+                <strong id="res-correct" style="color: var(--correct)">0</strong>
+            </div>
+            <div class="summary-item">
+                <span>Respostas Incorretas:</span>
+                <strong id="res-incorrect" style="color: var(--incorrect)">0</strong>
+            </div>
+        </div>
+
+        <button class="btn" onclick="restartQuiz()">Reiniciar Simulado</button>
+    </div>
+</div>
+
+<script>
+const rawQuestions = [
+    // MÓDULO I
+    {
+        num: 1,
+        module: "I",
+        moduleTitle: "Módulo I: Organização do Estado e CRA",
+        question: "O que é a Organização do Estado segundo a Constituição da República de Angola (CRA)?",
+        options: [
+            "É a estrutura de gestão do setor privado corporativo no território angolano.",
+            "É a forma como o Estado se organiza politicamente, territorialmente e administrativamente.",
+            "É o conjunto de empresas públicas com autonomia financeira e administrativa.",
+            "É a divisão exclusiva dos poderes entre os órgãos judiciais das províncias."
+        ],
+        correct: 1,
+        explanation: "Segundo a CRA, a Organização do Estado corresponde à forma como o Estado angolano se estrutura sob o ponto de vista político, territorial e administrativo para o exercício do poder."
+    },
+    {
+        num: 2,
+        module: "I",
+        moduleTitle: "Módulo I: Organização do Estado e CRA",
+        question: "Quais são os princípios fundamentais que regem a Administração Pública angolana?",
+        options: [
+            "Lucratividade, sigilo absoluto, discricionariedade plena e rigidez hierárquica.",
+            "Centralização decisória, imunidade dos agentes, conveniência e autoridade.",
+            "Legalidade, imparcialidade, transparência, responsabilidade, eficiência e serviço ao interesse público.",
+            "Autonomia privada, supremacia individual, informalidade e delegação total."
+        ],
+        correct: 2,
+        explanation: "A Administração Pública orienta-se pelos princípios da legalidade, imparcialidade, transparência, responsabilidade, eficiência e prossecução do interesse público."
+    },
+    {
+        num: 3,
+        module: "I",
+        moduleTitle: "Módulo I: Organização do Estado e CRA",
+        question: "Como se define o princípio da legalidade na Administração Pública?",
+        options: [
+            "A Administração Pública pode agir livremente, desde que a lei não proíba expressamente.",
+            "Todos os atos da Administração devem estar de acordo estrito com a lei e a Constituição.",
+            "Os regulamentos internos sobrepõem-se à Constituição da República em casos de emergência.",
+            "Os atos administrativos só exigem fundamentação legal quando causarem prejuízo direto aos governantes."
+        ],
+        correct: 1,
+        explanation: "O princípio da legalidade determina que os órgãos e agentes da Administração Pública só podem agir em conformidade com a lei e com a Constituição."
+    },
+    {
+        num: 4,
+        module: "I",
+        moduleTitle: "Módulo I: Organização do Estado e CRA",
+        question: "O que exige o princípio da imparcialidade da conduta do funcionário público?",
+        options: [
+            "O funcionário deve priorizar o atendimento de cidadãos do seu círculo familiar.",
+            "O funcionário público deve agir sem favoritismo nem discriminação no exercício das suas funções.",
+            "O funcionário deve abster-se de tomar qualquer decisão administrativa sem ordem judicial.",
+            "O funcionário pode aplicar penalidades com base nas suas preferências político-partidárias."
+        ],
+        correct: 1,
+        explanation: "A imparcialidade impõe que a Administração trate com igualdade e isenção todos os cidadãos, sem favoritismos nem discriminações."
+    },
+    {
+        num: 5,
+        module: "I",
+        moduleTitle: "Módulo I: Organização do Estado e CRA",
+        question: "Como se garante o acesso aos serviços públicos segundo os preceitos constitucionais?",
+        options: [
+            "Pela restrição do atendimento aos cidadãos com contribuições fiscais em dia.",
+            "Mediante cobrança obrigatória de taxas em todos os atendimentos sem exceção.",
+            "Pela igualdade de tratamento e pelo direito de todos os cidadãos serem atendidos.",
+            "Através da priorização de cidadãos que ocupem cargos estatais de relevo."
+        ],
+        correct: 2,
+        explanation: "O acesso aos serviços públicos é assegurado pelo princípio da igualdade de acesso e universalidade na prestação dos serviços ao cidadão."
+    },
+    {
+        num: 6,
+        module: "I",
+        moduleTitle: "Módulo I: Organização do Estado e CRA",
+        question: "Qual é o papel fundamental do Estado na promoção do bem-estar social?",
+        options: [
+            "Transferir a responsabilidade total da saúde e educação para entidades privadas.",
+            "Promover políticas públicas de desenvolvimento, justiça social e qualidade de vida.",
+            "Focar exclusivamente na arrecadação tributária e segurança militar.",
+            "Limitar a sua intervenção à regulação do comércio internacional."
+        ],
+        correct: 1,
+        explanation: "O Estado tem o dever constitucional de criar e executar políticas públicas que visem o desenvolvimento económico, a justiça social e a melhoria da qualidade de vida."
+    },
+
+    // MÓDULO II
+    {
+        num: 7,
+        module: "II",
+        moduleTitle: "Módulo II: Administração Local do Estado (Lei n.º 15/16)",
+        question: "O que é a Administração Local do Estado segundo a Lei n.º 15/16?",
+        options: [
+            "É o conjunto de empresas e fundações com capitais maioritariamente privados.",
+            "É o conjunto de órgãos que representam o Estado nas províncias, municípios e comunas.",
+            "É o órgão máximo legislativo com jurisdição sobre as autarquias locais.",
+            "É a representação diplomática do Estado Angolano no estrangeiro."
+        ],
+        correct: 1,
+        explanation: "A Lei n.º 15/16 estabelece que a Administração Local do Estado integra os órgãos desconcentrados que asseguram o cumprimento das atribuições do Estado nas circunscrições territoriais (províncias, municípios e comunas)."
+    },
+    {
+        num: 8,
+        module: "II",
+        moduleTitle: "Módulo II: Administração Local do Estado (Lei n.º 15/16)",
+        question: "Quais são os principais órgãos da Administração Local do Estado em Angola?",
+        options: [
+            "Assembleia Nacional, Tribunais Provinciais e Ministérios.",
+            "Governos Provinciais, Administrações Municipais e Administrações Comunais.",
+            "Conselho de Ministros, Procuradoria e Polícia Nacional.",
+            "Empresas Públicas Provinciais, Institutos e Ordens Profissionais."
+        ],
+        correct: 1,
+        explanation: "A estrutura desconcentrada da Administração Local do Estado é composta pelos Governos Provinciais, Administrações Municipais e Administrações Comunais."
+    },
+    {
+        num: 9,
+        module: "II",
+        moduleTitle: "Módulo II: Administração Local do Estado (Lei n.º 15/16)",
+        question: "Qual é a função central do Governo Provincial no âmbito da Administração Local?",
+        options: [
+            "Aprovar a legislação nacional sobre o regime geral da função pública.",
+            "Coordenar e executar políticas públicas a nível da respetiva província.",
+            "Nomear os juízes dos Tribunais de Comarca da respetiva jurisdição.",
+            "Gerir a política monetária e a taxa de câmbio territorial."
+        ],
+        correct: 1,
+        explanation: "O Governo Provincial é o órgão encarregado de conduzir, coordenar e executar a política do Executivo e as tarefas da Administração Pública na Província."
+    },
+    {
+        num: 10,
+        module: "II",
+        moduleTitle: "Módulo II: Administração Local do Estado (Lei n.º 15/16)",
+        question: "Quais são as atribuições precípuas de uma Administração Municipal?",
+        options: [
+            "Executar políticas públicas locais, promover o desenvolvimento e prestar serviços à população.",
+            "Elaborar leis nacionais e ratificar tratados internacionais.",
+            "Superintender as forças armadas e a segurança das fronteiras.",
+            "Fiscalizar a atividade das embaixadas e consulados."
+        ],
+        correct: 0,
+        explanation: "A Administração Municipal é o órgão local encarregado de implementar as ações do Estado no município, dinamizando o desenvolvimento e prestando serviços essenciais."
+    },
+    {
+        num: 11,
+        module: "II",
+        moduleTitle: "Módulo II: Administração Local do Estado (Lei n.º 15/16)",
+        question: "Qual é a principal vantagem da descentralização e desconcentração administrativa?",
+        options: [
+            "Aumentar a burocracia e a sobreposição de competências no poder central.",
+            "Permitir que as decisões e os serviços públicos estejam mais próximos da população.",
+            "Transferir a responsabilidade da prestação de serviços para os cidadãos.",
+            "Centralizar todas as receitas orçamentais na capital do País."
+        ],
+        correct: 1,
+        explanation: "A aproximação dos órgãos de decisão e prestação de serviços dos cidadãos garante maior eficácia e adequação às necessidades locais reais."
+    },
+    {
+        num: 12,
+        module: "II",
+        moduleTitle: "Módulo II: Administração Local do Estado (Lei n.º 15/16)",
+        question: "Quais competências recaem sobre as administrações locais no desenvolvimento comunitário?",
+        options: [
+            "Fixar a política cambial e emitir papel-moeda nacional.",
+            "Promover o desenvolvimento económico/social, gerir infraestruturas básicas, apoiar educação, saúde, cultura e assegurar a participação cidadã.",
+            "Julgar crimes contra a segurança do Estado.",
+            "Definir a pauta aduaneira e negociar dívida externa."
+        ],
+        correct: 1,
+        explanation: "As administrações locais têm a seu cargo a gestão de proximidade: infraestruturas locais, saúde primária, ensino primário, ação social e fomento económico comunitário."
+    },
+
+    // MÓDULO III
+    {
+        num: 13,
+        module: "III",
+        moduleTitle: "Módulo III: Função Pública (Lei n.º 26/22 & Dec. 24/91)",
+        question: "O que estabelece a Lei n.º 26/22 (Lei da Função Pública)?",
+        options: [
+            "O Código Penal aplicável aos crimes económicos da função pública.",
+            "Os princípios, direitos, deveres e o regime jurídico geral dos funcionários públicos.",
+            "As regras para a contratação exclusiva de consultores internacionais.",
+            "A estrutura orgânica do Ministério das Finanças."
+        ],
+        correct: 1,
+        explanation: "A Lei n.º 26/22 estabelece o regime jurídico geral da função pública, definindo os direitos, deveres, garantias e princípios do vínculo com o Estado."
+    },
+    {
+        num: 14,
+        module: "III",
+        moduleTitle: "Módulo III: Função Pública (Lei n.º 26/22 & Dec. 24/91)",
+        question: "Quem está habilitado a exercer funções públicas na Administração angolana?",
+        options: [
+            "Qualquer cidadão selecionado por indicação direta não regulamentada.",
+            "Cidadãos que preencham os requisitos legais, mediante concurso público ou nomeação legal.",
+            "Apenas cidadãos portadores de diploma de pós-graduação ou doutoramento.",
+            "Apenas trabalhadores transferidos do setor privado."
+        ],
+        correct: 1,
+        explanation: "O acesso à função pública faz-se por regra via concurso público, assegurando os requisitos legais de provimento de cargos."
+    },
+    {
+        num: 15,
+        module: "III",
+        moduleTitle: "Módulo III: Função Pública (Lei n.º 26/22 & Dec. 24/91)",
+        question: "Quais são direitos fundamentais assegurados aos funcionários públicos?",
+        options: [
+            "Isenção de impostos, estabilidade incondicional e aposentação aos 40 anos.",
+            "Remuneração justa, formação contínua, progressão na carreira e proteção social.",
+            "Direito de recusar cumprir ordens legais e ausência de avaliação de desempenho.",
+            "Acumulação irrestrita de cargos executivos no setor privado."
+        ],
+        correct: 1,
+        explanation: "Entre os direitos do funcionário público destacam-se a remuneração, a formação, o desenvolvimento na carreira e o sistema de proteção social."
+    },
+    {
+        num: 16,
+        module: "III",
+        moduleTitle: "Módulo III: Função Pública (Lei n.º 26/22 & Dec. 24/91)",
+        question: "Quais são os deveres nucleares do agente/funcionário público?",
+        options: [
+            "Cumprir a lei, servir com exclusividade o interesse público, agir com ética e responsabilidade.",
+            "Atender prioritariamente a pedidos de conhecidos e familiares.",
+            "Guardar segredo absoluto sobre atos ilícitos de superiores hierárquicos.",
+            "Priorizar os seus interesses comerciais nas decisões administrativas."
+        ],
+        correct: 0,
+        explanation: "O funcionário está adstrito aos deveres de legalidade, lealdade, zelo, assiduidade, pontualidade, urbanidade e subordinação ao interesse público."
+    },
+    {
+        num: 17,
+        module: "III",
+        moduleTitle: "Módulo III: Função Pública (Lei n.º 26/22 & Dec. 24/91)",
+        question: "O que caracteriza a responsabilidade disciplinar na Função Pública?",
+        options: [
+            "É o dever do funcionário de indemnizar financeiramente os colegas de trabalho.",
+            "É a sujeição do funcionário a sanções disciplinares caso viole deveres funcionais ou normas regulamentares.",
+            "É a perda automática de cidadania em caso de falta não justificada.",
+            "É a obrigação de cumprir pena privativa de liberdade sem processo judicial."
+        ],
+        correct: 1,
+        explanation: "A responsabilidade disciplinar decorre da infração cometida pelo funcionário no descumprimento dos seus deveres, sujeitando-o às sanções previstas na lei."
+    },
+    {
+        num: 18,
+        module: "III",
+        moduleTitle: "Módulo III: Função Pública (Lei n.º 26/22 & Dec. 24/91)",
+        question: "Como se define o conceito de 'carreira' na função pública?",
+        options: [
+            "O conjunto de cargos políticos temporários ocupados por nomeação do Executivo.",
+            "O conjunto hierarquizado de categorias a que correspondem funções da mesma natureza, permitindo a progressão profissional.",
+            "A lista de funcionários que exercem cargos de chefia superior.",
+            "O período experimental cumprido nos primeiros 6 meses de serviço."
+        ],
+        correct: 1,
+        explanation: "Carreira é o percurso profissional do funcionário público, organizado hierarquicamente por categorias que preveem o seu desenvolvimento."
+    },
+    {
+        num: 19,
+        module: "III",
+        moduleTitle: "Módulo III: Função Pública (Lei n.º 26/22 & Dec. 24/91)",
+        question: "Quais são os fatores condicionantes para a progressão na carreira do funcionário público?",
+        options: [
+            "Indicação partidária e antiguidade exclusiva no cargo.",
+            "Avaliação de desempenho positiva, tempo de serviço exigido e preenchimento dos requisitos legais.",
+            "Aprovação em votação interna promovida pelos cidadãos do município.",
+            "Decisão discricionária do chefe direto sem fundamentação técnica."
+        ],
+        correct: 1,
+        explanation: "A evolução na carreira depende do mérito demonstrado (avaliação de desempenho), do tempo mínimo de serviço na categoria e do cumprimento dos demais requisitos regulamentares."
+    },
+    {
+        num: 20,
+        module: "III",
+        moduleTitle: "Módulo III: Função Pública (Lei n.º 26/22 & Dec. 24/91)",
+        question: "Qual o objeto principal do Decreto n.º 24/91 no ordenamento jurídico angolano?",
+        options: [
+            "Definir a tabela salarial dos órgãos autárquicos.",
+            "Estabelecer os princípios e a estrutura das carreiras do regime geral da função pública.",
+            "Regulamentar a contratação pública de obras de grande dimensão.",
+            "Fixar as normas para a concessão de vistos e passaportes."
+        ],
+        correct: 1,
+        explanation: "O Decreto n.º 24/91 estabelece os princípios gerais sobre a estrutura das carreiras do regime geral da função pública."
+    },
+
+    // MÓDULO IV
+    {
+        num: 21,
+        module: "IV",
+        moduleTitle: "Módulo IV: Procedimento Administrativo (Lei n.º 31/22 - CPA)",
+        question: "O que regula o Código do Procedimento Administrativo (Lei n.º 31/22 - CPA)?",
+        options: [
+            "As regras do processo penal aplicáveis aos crimes comuns.",
+            "A forma como a Administração Pública prepara, toma as suas decisões e pratica atos administrativos.",
+            "As relações de trabalho exclusivamente entre empresas privadas.",
+            "As normas de trânsito e circulação rodoviária nacional."
+        ],
+        correct: 1,
+        explanation: "O CPA disciplina o modo de atuação da Administração Pública, garantindo que as decisões sejam tomadas de forma instruída, transparente e legal."
+    },
+    {
+        num: 22,
+        module: "IV",
+        moduleTitle: "Módulo IV: Procedimento Administrativo (Lei n.º 31/22 - CPA)",
+        question: "Qual é o principal objetivo da existência do Código do Procedimento Administrativo?",
+        options: [
+            "Dificultar o acesso do cidadão às informações governamentais.",
+            "Garantir a legalidade, a transparência, a eficiência e a proteção dos direitos dos administrados.",
+            "Assegurar a imunidade total dos agentes públicos que praticam ilícitos.",
+            "Permitir o aumento das taxas de serviço sem consulta legal."
+        ],
+        correct: 1,
+        explanation: "O CPA visa aproximar a Administração dos cidadãos, assegurando garantias de defesa, transparência, justiça e legalidade dos atos estatais."
+    },
+    {
+        num: 23,
+        module: "IV",
+        moduleTitle: "Módulo IV: Procedimento Administrativo (Lei n.º 31/22 - CPA)",
+        question: "Quais são as fases ordenadas do procedimento administrativo ordinário?",
+        options: [
+            "Iniciativa (Início), Instrução, Decisão e Execução.",
+            "Acusação, Julgamento, Recurso e Prisão.",
+            "Planeamento, Orçamentação, Licitação e Pagamento.",
+            "Candidatura, Entrevista, Admissão e Reforma."
+        ],
+        correct: 0,
+        explanation: "O procedimento administrativo estrutura-se tipicamente nas fases de Iniciativa (abertura), Instrução (recolha de prova/pareceres), Decisão (tomada de resolução) e Execução (cumprimento do ato)."
+    },
+    {
+        num: 24,
+        module: "IV",
+        moduleTitle: "Módulo IV: Procedimento Administrativo (Lei n.º 31/22 - CPA)",
+        question: "O que se entende por 'Ato Administrativo'?",
+        options: [
+            "Qualquer declaração proferida por um cidadão em sede de tribunal.",
+            "A decisão unilateral proferida por órgão da Administração Pública com produção de efeitos jurídicos numa situação concreta.",
+            "O contrato celebrado exclusivamente entre empresas privadas comerciais.",
+            "A publicação de pareceres técnicos sem força vinculativa."
+        ],
+        correct: 1,
+        explanation: "Ato administrativo é a decisão de um órgão da Administração que, ao abrigo de normas de direito público, visa produzir efeitos jurídicos numa situação individual e concreta."
+    },
+    {
+        num: 25,
+        module: "IV",
+        moduleTitle: "Módulo IV: Procedimento Administrativo (Lei n.º 31/22 - CPA)",
+        question: "Quais são os elementos essenciais constitutivos do ato administrativo?",
+        options: [
+            "Competência, finalidade, forma, motivo e objeto.",
+            "Lucro, comissão, contrato e carimbo legal.",
+            "Assinatura judicial, caução, fiança e publicação externa.",
+            "Testemunhas, termo de posse, selo e valor económico."
+        ],
+        correct: 0,
+        explanation: "Os elementos essenciais do ato são a competência do órgão, o motivo (fundamento), o objeto (conteúdo), a finalidade (interesse público) e a forma legal."
+    },
+    {
+        num: 26,
+        module: "IV",
+        moduleTitle: "Módulo IV: Procedimento Administrativo (Lei n.º 31/22 - CPA)",
+        question: "Quando é que um ato administrativo padece de invalidez (nulidade ou anulabilidade)?",
+        options: [
+            "Quando é praticado em prazo inferior ao previsto.",
+            "Quando viola a lei ou é praticado por autoridade incompetente.",
+            "Quando é publicado no Diário da República.",
+            "Quando é favorável ao cidadão interessado."
+        ],
+        correct: 1,
+        explanation: "A violação da lei, a usurpação de poder ou a falta de competência do órgão prolator tornam o ato administrativo inválido."
+    },
+    {
+        num: 27,
+        module: "IV",
+        moduleTitle: "Módulo IV: Procedimento Administrativo (Lei n.º 31/22 - CPA)",
+        question: "O que assegura o direito de audiência dos interessados no procedimento?",
+        options: [
+            "O direito de o cidadão ser ouvido e apresentar alegações/provas antes de tomada a decisão final.",
+            "A obrigação de o cidadão pagar uma taxa para ser recebido pelo dirigente.",
+            "O julgamento público dos processos administrativos em tribunal penal.",
+            "A possibilidade de anular leis aprovadas pela Assembleia Nacional."
+        ],
+        correct: 0,
+        explanation: "O direito de audiência prévia garante que os cidadãos possam intervir no procedimento antes da decisão final, defendendo os seus direitos e interesses."
+    },
+    {
+        num: 28,
+        module: "IV",
+        moduleTitle: "Módulo IV: Procedimento Administrativo (Lei n.º 31/22 - CPA)",
+        question: "Como se manifesta o princípio da transparência na atividade administrativa?",
+        options: [
+            "Pelo dever de manter em sigilo todos os processos sem exceção.",
+            "Pela abertura, clareza e faculdade de acesso dos cidadãos aos documentos e decisões estatais.",
+            "Pela destruição periódica de ficheiros e dados públicos.",
+            "Pela divulgação de dados unicamente a entidades bancárias."
+        ],
+        correct: 1,
+        explanation: "Transparência exige que a atividade administrativa seja clara e acessível, permitindo o controlo do cidadão sobre a atuação dos seus órgãos."
+    },
+    {
+        num: 29,
+        module: "IV",
+        moduleTitle: "Módulo IV: Procedimento Administrativo (Lei n.º 31/22 - CPA)",
+        question: "De que forma se concretiza a participação dos cidadãos no procedimento administrativo?",
+        options: [
+            "Apenas através do exercício do voto nas eleições gerais.",
+            "Mediante a apresentação de reclamações, sugestões, petições ou consultas públicas.",
+            "Com o pagamento de cauções de garantia em todos os requerimentos.",
+            "Ocupando cargos administrativos sem concurso prévio."
+        ],
+        correct: 1,
+        explanation: "A participação cidadã ocorre através de petições, reclamações, recursos administrativos e participação em consultas/audiências públicas."
+    },
+
+    // MÓDULO V
+    {
+        num: 30,
+        module: "V",
+        moduleTitle: "Módulo V: Ética, Deontologia e Integridade Pública",
+        question: "O que se entende por 'Ética na Função Pública'?",
+        options: [
+            "A busca de estratégias para maximizar os rendimentos financeiros pessoais do funcionário.",
+            "O conjunto de valores, deveres e princípios morais que orientam a conduta do servidor público.",
+            "O cumprimento de regras estritamente quando há fiscalização presencial.",
+            "A imunidade concedida aos gestores em caso de desvio de fundos."
+        ],
+        correct: 1,
+        explanation: "A ética no serviço público refere-se ao código moral e aos padrões de conduta íntegra exigidos aos agentes no exercício do poder público."
+    },
+    {
+        num: 31,
+        module: "V",
+        moduleTitle: "Módulo V: Ética, Deontologia e Integridade Pública",
+        question: "Quais são os valores éticos fundamentais do servidor público?",
+        options: [
+            "Individualismo, ambição, rigidez e sigilo corporativo.",
+            "Honestidade, lealdade, respeito, responsabilidade e profissionalismo.",
+            "Conveniência, flexibilidade de regras, apadrinhamento e tolerância com ilícitos.",
+            "Competitividade agressiva, busca de compensações não regulamentadas e vaidade."
+        ],
+        correct: 1,
+        explanation: "Honestidade, lealdade à pátria, integridade, respeito pelos cidadãos e rigor profissional constituem a base ética do serviço público."
+    },
+    {
+        num: 32,
+        module: "V",
+        moduleTitle: "Módulo V: Ética, Deontologia e Integridade Pública",
+        question: "Por que motivo a conduta ética é indispensável na Administração Pública?",
+        options: [
+            "Porque permite contornar a burocracia sem necessidade de alteração de leis.",
+            "Porque garante a credibilidade das instituições, a confiança dos cidadãos e a boa gestão dos recursos.",
+            "Porque serve para punir unicamente os funcionários de categorias inferiores.",
+            "Porque substitui a necessidade de orçamentos e prestação de contas."
+        ],
+        correct: 1,
+        explanation: "A ética pública assegura a confiança da sociedade no Estado e garante que os recursos coletivos sejam aplicados de forma justa."
+    },
+    {
+        num: 33,
+        module: "V",
+        moduleTitle: "Módulo V: Ética, Deontologia e Integridade Pública",
+        question: "Como se carateriza a situação de 'Conflito de Interesses'?",
+        options: [
+            "Quando dois órgãos públicos disputam a mesma verba orçamental.",
+            "Quando o interesse privado do funcionário pode influenciar indevidamente o cumprimento imparcial dos seus deveres públicos.",
+            "Quando o cidadão discorda do valor de uma taxa cobrada pelo Estado.",
+            "Quando há divergência de opiniões em reuniões de trabalho."
+        ],
+        correct: 1,
+        explanation: "Existe conflito de interesses quando um interesse pessoal do agente confronta-se com o interesse público que lhe cumpre salvaguardar."
+    },
+    {
+        num: 34,
+        module: "V",
+        moduleTitle: "Módulo V: Ética, Deontologia e Integridade Pública",
+        question: "Qual a atitude correta do servidor para prevenir ou resolver conflitos de interesses?",
+        options: [
+            "Ocultar a situação e tomar a decisão rapidamente.",
+            "Agir com transparência, declarar-se impedido ou suspeito e abster-se de intervir na decisão.",
+            "Delegar a decisão a um subordinado sob sua estrita orientação verbal.",
+            "Cobrar uma taxa adicional ao interessado para compensar a situação."
+        ],
+        correct: 1,
+        explanation: "A conduta ética perante um conflito de interesses exige a declaração imediata do impedimento e o afastamento do processo."
+    },
+    {
+        num: 35,
+        module: "V",
+        moduleTitle: "Módulo V: Ética, Deontologia e Integridade Pública",
+        question: "O que configura 'Assédio no local de trabalho' na Função Pública?",
+        options: [
+            "A exigência do cumprimento do horário oficial de trabalho.",
+            "A atribuição de tarefas compatíveis com a categoria do funcionário.",
+            "Toda a conduta abusiva, reiterada, que viole a dignidade, integridade física ou psicológica do trabalhador.",
+            "A realização de avaliações de desempenho periódicas."
+        ],
+        correct: 2,
+        explanation: "O assédio moral ou sexual constitui violação grave dos direitos do trabalhador, afetando a sua dignidade e ambiente de trabalho."
+    },
+    {
+        num: 36,
+        module: "V",
+        moduleTitle: "Módulo V: Ética, Deontologia e Integridade Pública",
+        question: "Qual é a razão determinante para o dever de sigilo profissional?",
+        options: [
+            "Esconder do público eventuais erros de gestão para proteger a imagem dos dirigentes.",
+            "Proteger dados reservados, segredos de Estado e informações de cidadãos, garantindo a segurança institucional.",
+            "Evitar que outros órgãos estatais saibam o trabalho realizado no setor.",
+            "Impedir que a comunicação social divulgue relatórios de contas aprovados."
+        ],
+        correct: 1,
+        explanation: "O sigilo protege dados pessoais e matérias de segurança nacional ou segredo de justiça, não podendo servir de pretexto para ocultar ilegalidades."
+    },
+    {
+        num: 37,
+        module: "V",
+        moduleTitle: "Módulo V: Ética, Deontologia e Integridade Pública",
+        question: "De que forma o funcionário público deve manusear e cuidar do património público?",
+        options: [
+            "Utilizando-o para fins pessoais desde que fora do horário de expediente.",
+            "Com zelo, economia, responsabilidade e afetação exclusiva a finalidades públicas.",
+            "Aliando-o ou doando-o sem necessidade de inventário.",
+            "Permitindo o seu uso por familiares caso não haja custos adicionais."
+        ],
+        correct: 1,
+        explanation: "Os bens do Estado pertencem à coletividade, devendo o funcionário zelar pela sua conservação e estrita utilização no serviço."
+    },
+    {
+        num: 38,
+        module: "V",
+        moduleTitle: "Módulo V: Ética, Deontologia e Integridade Pública",
+        question: "O que define o fenómeno da 'Corrupção' no contexto da Administração Pública?",
+        options: [
+            "Atraso injustificado no pagamento de salários pela função pública.",
+            "O uso indevido do cargo, poder ou função pública para obter vantagens indevidas pessoais ou para terceiros.",
+            "A contratação de serviços por concurso público transparente.",
+            "A alteração da estrutura de carreiras por diploma legal."
+        ],
+        correct: 1,
+        explanation: "A corrupção traduz-se no desvio do poder público para benefício privado, violando gravemente a legalidade e a ética."
+    },
+    {
+        num: 39,
+        module: "V",
+        moduleTitle: "Módulo V: Ética, Deontologia e Integridade Pública",
+        question: "Quais são pilares essenciais no combate continuado à corrupção?",
+        options: [
+            "Sigilo nos processos burocráticos e eliminação do controlo financeiro.",
+            "Transparência, fiscalização rigorosa, punição exemplar e educação ética.",
+            "Perdão sistemático de infrações graves e desregulamentação total.",
+            "Centralização de decisões numa única pessoa sem qualquer audição."
+        ],
+        correct: 1,
+        explanation: "O combate à corrupção exige prevenção (educação e transparência), controlo (fiscalização) e repressão (punição legal)."
+    },
+    {
+        num: 40,
+        module: "V",
+        moduleTitle: "Módulo V: Ética, Deontologia e Integridade Pública",
+        question: "Qual o papel do cidadão no controlo social da Administração Pública?",
+        options: [
+            "Apenas acatar passivamente todas as decisões tomadas.",
+            "Fiscalizar a ação pública, denunciar irregularidades e participar na gestão através dos mecanismos legais.",
+            "Substituir os órgãos de polícia na aplicação de sanções.",
+            "Financiar diretamente os serviços com doações informais."
+        ],
+        correct: 1,
+        explanation: "O controlo social exercido pelos cidadãos e sociedade civil é um pilar da boa governação e combate à má gestão."
+    },
+    {
+        num: 41,
+        module: "V",
+        moduleTitle: "Módulo V: Ética, Deontologia e Integridade Pública",
+        question: "Quais são as potenciais consequências do não cumprimento das normas éticas pelo funcionário?",
+        options: [
+            "Concessão de louvores pelo espírito de iniciativa privado.",
+            "Aplicação de sanções disciplinares (advertência, repreensão, demissão) sem prejuízo de responsabilidade criminal ou civil.",
+            "Transferência com promoção imediata para outro setor.",
+            "Isenção de qualquer tipo de responsabilidade."
+        ],
+        correct: 1,
+        explanation: "A infração aos deveres éticos sujeita o prevaricador a sanções disciplinares, cíveis e penais nos termos da lei."
+    },
+    {
+        num: 42,
+        module: "V",
+        moduleTitle: "Módulo V: Ética, Deontologia e Integridade Pública",
+        question: "Por que razão a integridade institucional fortalece a democracia?",
+        options: [
+            "Porque reduz a necessidade de realizar eleições periódicas.",
+            "Porque previne desvios de fundos e reforça a confiança dos cidadãos nas instituições públicas.",
+            "Porque elimina a necessidade de existir Poder Judiciário.",
+            "Porque garante que o Estado funcione sem custos operacionais."
+        ],
+        correct: 1,
+        explanation: "A integridade garante a legitimidade do poder público e assegura que as instituições sirvam verdadeiramente o povo."
+    },
+
+    // MÓDULO VI
+    {
+        num: 43,
+        module: "VI",
+        moduleTitle: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+        question: "O que são 'Políticas Públicas'?",
+        options: [
+            "Campanhas eleitorais desenvolvidas exclusivamente pelos partidos políticos.",
+            "Conjunto de programas, ações e decisões tomadas pelo Estado para assegurar direitos e resolver problemas da população.",
+            "Atividades comerciais desenvolvidas por empresas estatais no mercado internacional.",
+            "Regulamentos internos de conduta dos funcionários administrativos."
+        ],
+        correct: 1,
+        explanation: "Políticas públicas são os instrumentos de ação do Estado idealizados para responder a necessidades sociais coletivas."
+    },
+    {
+        num: 44,
+        module: "VI",
+        moduleTitle: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+        question: "Quais dos seguintes conjuntos representam exemplos de áreas de Políticas Públicas?",
+        options: [
+            "Publicidade comercial, marketing privado e concessão de crédito individual.",
+            "Saúde, educação, habitação, segurança pública e assistência social.",
+            "Gestão de bolsas de valores privadas e venda de automóveis.",
+            "Organização de eventos recreativos restritos a dirigentes."
+        ],
+        correct: 1,
+        explanation: "Setores fundamentais como educação, saúde, habitação e segurança constituem o núcleo das políticas públicas sociais e económicas."
+    },
+    {
+        num: 45,
+        module: "VI",
+        moduleTitle: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+        question: "Como se avalia a qualidade da prestação do serviço público?",
+        options: [
+            "Apenas pelo montante total de dinheiro gasto na instituição.",
+            "Pelo nível de satisfação dos cidadãos, pela eficiência e pelos resultados concretos alcançados.",
+            "Pela quantidade de formulários em papel preenchidos.",
+            "Pelo número de funcionários contratados sem avaliação de necessidades."
+        ],
+        correct: 1,
+        explanation: "A qualidade mede-se pelo grau de satisfação das necessidades dos utentes e pela otimização dos recursos empregues."
+    },
+    {
+        num: 46,
+        module: "VI",
+        moduleTitle: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+        question: "O que traduz o conceito de 'Eficiência' na Gestão Pública?",
+        options: [
+            "Atingir os fins propostos a qualquer custo financeiro ou temporal.",
+            "Realizar as atribuições otimizando os recursos disponíveis (fazer mais e melhor com menos custos e no menor tempo).",
+            "Apenas cumprir os horários formais sem preocupação com os resultados obtidos.",
+            "Adiar decisões para evitar cometer erros processuais."
+        ],
+        correct: 1,
+        explanation: "Eficiência diz respeito à melhor relação possível entre os meios (recursos/custos) utilizados e os rendimentos/serviços gerados."
+    },
+    {
+        num: 47,
+        module: "VI",
+        moduleTitle: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+        question: "Como se define 'Eficácia' na Administração Pública?",
+        options: [
+            "A capacidade de atingir as metas e objetivos planeados e delineados pelas políticas públicas.",
+            "A redução drástica e cega de 90% dos custos em todas as áreas sociais.",
+            "A elaboração de relatórios sem implementação prática no terreno.",
+            "A contratação continuada de consultorias externas para execução de tarefas básicas."
+        ],
+        correct: 0,
+        explanation: "Eficácia refere-se ao cumprimento efetivo dos objetivos traçados (obtenção do resultado pretendido)."
+    },
+    {
+        num: 48,
+        module: "VI",
+        moduleTitle: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+        question: "O que significa 'Efetividade' no âmbito da avaliação das ações públicas?",
+        options: [
+            "Garantir que os documentos foram assinados dentro do prazo legal.",
+            "Gerar um impacto real, duradouro e positivo de transformação na vida da população.",
+            "Gastar a totalidade das verbas atribuídas no orçamento antes do final do ano.",
+            "Ter uma página de internet com informação institucional atualizada."
+        ],
+        correct: 1,
+        explanation: "Efetividade mede o impacto real de longo prazo que a ação do Estado produz na sociedade (transformação e benefício concreto)."
+    },
+    {
+        num: 49,
+        module: "VI",
+        moduleTitle: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+        question: "Qual a diferença conceptual entre Centralização e Descentralização?",
+        options: [
+            "Centralização foca no setor privado; Descentralização foca na administração pública.",
+            "Centralização concentra as decisões na administração central; Descentralização transfere atribuições e poderes para níveis locais/autónomos.",
+            "Centralização é ilegal; Descentralização é a única forma permitida na Constituição.",
+            "Não existe diferença, tratam-se de sinónimos no direito administrativo."
+        ],
+        correct: 1,
+        explanation: "Centralização retém o poder decisório no topo estatal; Descentralização distribui competências administrativas para entes locais com autonomia."
+    },
+    {
+        num: 50,
+        module: "VI",
+        moduleTitle: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+        question: "O que são 'Órgãos Desconcentrados' da Administração Pública?",
+        options: [
+            "Empresas privadas subcontratadas para limpeza e segurança.",
+            "Órgãos do Estado que atuam em nome da Administração Central numa determinada parcela do território.",
+            "Associações de moradores sem vínculos com o Governo.",
+            "Organizações internacionais de cooperação para o desenvolvimento."
+        ],
+        correct: 1,
+        explanation: "A desconcentração é a distribuição de competências dentro da mesma pessoa coletiva pública (ex: serviços provinciais de um ministério)."
+    },
+    {
+        num: 51,
+        module: "VI",
+        moduleTitle: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+        question: "O que implica o princípio da Responsabilidade no exercício do cargo público?",
+        options: [
+            "A prestação de garantia bancária individual no ato da posse.",
+            "O dever de o funcionário responder legal, ética e patrimonialmente pelos atos e omissões praticados no exercício das suas funções.",
+            "A obrigatoriedade de acatar ordens manifestamente ilegais de superiores.",
+            "A imunidade de acusação enquanto exercer a função."
+        ],
+        correct: 1,
+        explanation: "A responsabilidade obriga o servidor a assumir as consequências dos seus atos e omissões funcionais perante o Estado e os cidadãos."
+    },
+    {
+        num: 52,
+        module: "VI",
+        moduleTitle: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+        question: "Como deve ser o atendimento prestado pelo funcionário público ao cidadão?",
+        options: [
+            "Rápido apenas para conhecidos, e burocrático para os demais utentes.",
+            "Pautado pelo respeito, eficiência, cortesia, imparcialidade e igualdade de tratamento.",
+            "Cobrando taxas informais para agilizar processos pendentes.",
+            "Condicionado ao humor e disponibilidade voluntária do agente."
+        ],
+        correct: 1,
+        explanation: "O cidadão é o destinatário dos serviços públicos e deve ser atendido com urbanidade, presteza e igualdade."
+    },
+    {
+        num: 53,
+        module: "VI",
+        moduleTitle: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+        question: "De que forma prática a Administração Pública promove a transparência da sua gestão?",
+        options: [
+            "Recusando prestar informações sobre os orçamentos executados.",
+            "Divulgando dados públicos, promovendo o acesso aos documentos administrativos e publicando relatórios no Diário da República e portais oficiais.",
+            "Realizando reuniões à porta fechada para definir obras públicas.",
+            "Destruindo os relatórios financeiros de anos transatos."
+        ],
+        correct: 1,
+        explanation: "A publicidade e a prestação ativa de dados através dos canais oficiais garantem o acesso à informação e a transparência da gestão."
+    },
+    {
+        num: 54,
+        module: "VI",
+        moduleTitle: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+        question: "Qual a relevância da 'Prestação de Contas' (Accountability) no setor público?",
+        options: [
+            "Servir apenas como formalidade burocrática sem utilidade prática.",
+            "Permitir o controlo social e financeiro sobre a utilização das verbas públicas e assegurar a responsabilidade dos gestores.",
+            "Demonstrar que o Estado não precisa de impostos para funcionar.",
+            "Impedir a fiscalização pelos órgãos do Tribunal de Contas."
+        ],
+        correct: 1,
+        explanation: "Prestar contas é um dever sagrado de quem gere recursos públicos, assegurando que o povo saiba como o seu dinheiro foi investido."
+    },
+    {
+        num: 55,
+        module: "VI",
+        moduleTitle: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+        question: "Como a legislação administrativa contribui para aumentar a eficiência da gestão pública?",
+        options: [
+            "Aumentando a incerteza jurídica e alterando regras diariamente.",
+            "Estabelecendo normas, prazos e procedimentos claros para o funcionamento e tomadas de decisão dos órgãos.",
+            "Concedendo poder absoluto e ilimitado aos dirigentes máximos.",
+            "Restringindo o uso de tecnologias de informação nos serviços."
+        ],
+        correct: 1,
+        explanation: "Regras claras, procedimentos estandardizados e limites legais evitam arbitrariedades e aumentam a velocidade e segurança da gestão."
+    },
+    {
+        num: 56,
+        module: "VI",
+        moduleTitle: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+        question: "Quais são os principais desafios da gestão pública moderna em Angola?",
+        options: [
+            "Eliminar a prestação de serviços essenciais como saúde e educação.",
+            "Combater a corrupção, desburocratizar a administração, digitalizar serviços e melhorar a eficiência na prestação pública.",
+            "Aumentar o número de procedimentos em papel e o tempo de resposta aos cidadãos.",
+            "Reduzir o investimento na formação contínua dos quadros do Estado."
+        ],
+        correct: 1,
+        explanation: "A modernização exige combate à corrupção, simplificação de processos (desburocratização), inovação tecnológica e qualificação do capital humano."
+    },
+    {
+        num: 57,
+        module: "VI",
+        moduleTitle: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+        question: "De que modo a eficiência da Administração Pública impulsiona o desenvolvimento nacional?",
+        options: [
+            "Bloqueando o investimento privado através de taxas elevadas.",
+            "Garantindo serviços básicos de qualidade, atraindo investimento, construindo infraestruturas e promovendo o bem-estar social.",
+            "Aumentando os custos operacionais da maquina estatal.",
+            "Focando a sua atuação exclusivamente no centro urbano da capital."
+        ],
+        correct: 1,
+        explanation: "Uma Administração eficaz e honesta cria um ambiente favorável ao crescimento económico, estabilidade e progresso social de todo o País."
+    },
+    {
+        num: 58,
+        module: "VI",
+        moduleTitle: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+        question: "Qual o papel específico do funcionário público na implementação de políticas públicas?",
+        options: [
+            "Elaborar leis na Assembleia Nacional como deputado.",
+            "Executar com rigor, empenho e profissionalismo os programas governamentais para que os benefícios cheguem à população.",
+            "Decidir arbitrariamente quem deve ou não receber apoio estatal.",
+            "Apenas aprovar o orçamento anual de despesas."
+        ],
+        correct: 1,
+        explanation: "Os funcionários públicos são os agentes operacionais que transformam os planos e políticas estatais em realidade para o cidadão."
+    },
+    {
+        num: 59,
+        module: "VI",
+        moduleTitle: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+        question: "Por que a formação contínua dos servidores públicos é indispensável?",
+        options: [
+            "Para cumprir formalidades sem impacto no serviço prestado.",
+            "Para atualizar conhecimentos, aprimorar competências técnicas e elevar a qualidade do atendimento ao cidadão.",
+            "Para afastar os funcionários do posto de trabalho por longos períodos.",
+            "Para justificar aumentos automáticos de salários sem critérios de avaliação."
+        ],
+        correct: 1,
+        explanation: "A capacitação permanente garante que os quadros da Administração estejam preparados para lidar com os desafios tecnológicos e legislativos da atualidade."
+    },
+    {
+        num: 60,
+        module: "VI",
+        moduleTitle: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+        question: "Como se inter-relacionam Ética, Legalidade e Eficiência na Administração Pública?",
+        options: [
+            "São conceitos opostos; priorizar a legalidade impede a eficiência.",
+            "Trabalham de forma complementar: a legalidade define os limites, a ética orienta as atitudes íntegras e a eficiência assegura a máxima qualidade dos resultados.",
+            "A ética substitui integralmente a necessidade do cumprimento da lei.",
+            "A eficiência justifica a prática de atos ilegais desde que o objetivo seja atingido."
+        ],
+        correct: 1,
+        explanation: "Estes três pilares formam a tríade da boa administração pública: a lei delimita a atuação, a ética fundamenta a postura e a eficiência garante o resultado social."
+    }
+];
+
+// VARIÁVEIS DE ESTADO
+let currentFilteredQuestions = [...rawQuestions];
+let currentIndex = 0;
+let userAnswers = {}; // { questionNum: selectedOptionIndex }
+
+// ELEMENTOS DOM
+const moduleSelect = document.getElementById('module-select');
+const questionsCountBadge = document.getElementById('questions-count-badge');
+const progressText = document.getElementById('progress-text');
+const progressPercent = document.getElementById('progress-percent');
+const progressBar = document.getElementById('progress-bar');
+
+const quizArea = document.getElementById('quiz-area');
+const resultsArea = document.getElementById('results-area');
+
+const moduleTag = document.getElementById('module-tag');
+const questionText = document.getElementById('question-text');
+const optionsContainer = document.getElementById('options-container');
+const feedbackBox = document.getElementById('feedback-box');
+const feedbackTitle = document.getElementById('feedback-title');
+const feedbackText = document.getElementById('feedback-text');
+
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+
+// INICIALIZAÇÃO
+function initQuiz() {
+    filterQuestions();
+}
+
+function filterQuestions() {
+    const selectedMod = moduleSelect.value;
+    if (selectedMod === 'all') {
+        currentFilteredQuestions = [...rawQuestions];
+    } else {
+        currentFilteredQuestions = rawQuestions.filter(q => q.module === selectedMod);
+    }
+
+    questionsCountBadge.textContent = `${currentFilteredQuestions.length} Questões`;
+    currentIndex = 0;
+    userAnswers = {};
+
+    quizArea.style.display = 'flex';
+    resultsArea.style.display = 'none';
+
+    loadQuestion();
+}
+
+function loadQuestion() {
+    if (currentFilteredQuestions.length === 0) return;
+
+    const q = currentFilteredQuestions[currentIndex];
+
+    // Atualizar Barra de Progresso
+    const total = currentFilteredQuestions.length;
+    const currentNum = currentIndex + 1;
+    const pct = Math.round((currentNum / total) * 100);
+
+    progressText.textContent = `Questão ${currentNum} de ${total}`;
+    progressPercent.textContent = `${pct}%`;
+    progressBar.style.width = `${pct}%`;
+
+    // Atualizar Informações da Pergunta
+    moduleTag.textContent = q.moduleTitle;
+    questionText.textContent = `${q.num}. ${q.question}`;
+
+    // Renderizar Opções
+    optionsContainer.innerHTML = '';
+    feedbackBox.style.display = 'none';
+    feedbackBox.className = 'feedback-box';
+
+    const letters = ['A', 'B', 'C', 'D'];
+    const hasAnswered = userAnswers.hasOwnProperty(q.num);
+    const selectedOption = userAnswers[q.num];
+
+    q.options.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        
+        let extraClass = '';
+        if (hasAnswered) {
+            btn.disabled = true;
+            if (idx === q.correct) {
+                extraClass = 'selected-correct';
+            } else if (idx === selectedOption && idx !== q.correct) {
+                extraClass = 'selected-incorrect';
+            }
+        }
+
+        if (extraClass) {
+            btn.classList.add(extraClass);
+        }
+
+        btn.innerHTML = `
+            <span class="option-letter">${letters[idx]}</span>
+            <span>${optText}</span>
+        `;
+
+        btn.onclick = () => selectOption(idx);
+        optionsContainer.appendChild(btn);
+    });
+
+    // Se já foi respondida, exibe o feedback
+    if (hasAnswered) {
+        showFeedback(selectedOption === q.correct, q.explanation);
+    }
+
+    // Atualizar Botões de Navegação
+    prevBtn.disabled = currentIndex === 0;
+    
+    if (currentIndex === total - 1) {
+        nextBtn.textContent = hasAnswered ? 'Ver Resultado Final' : 'Finalizar Simulado';
+        nextBtn.disabled = !hasAnswered;
+    } else {
+        nextBtn.textContent = 'Próxima Questão';
+        nextBtn.disabled = !hasAnswered;
+    }
+}
+
+function selectOption(optionIndex) {
+    const q = currentFilteredQuestions[currentIndex];
+    userAnswers[q.num] = optionIndex;
+
+    loadQuestion();
+}
+
+function showFeedback(isCorrect, explanation) {
+    feedbackBox.style.display = 'block';
+    if (isCorrect) {
+        feedbackBox.className = 'feedback-box correct';
+        feedbackTitle.innerHTML = '✔ Resposta Correta!';
+    } else {
+        feedbackBox.className = 'feedback-box incorrect';
+        feedbackTitle.innerHTML = '✖ Resposta Incorreta!';
+    }
+    feedbackText.textContent = explanation;
+}
+
+function prevQuestion() {
+    if (currentIndex > 0) {
+        currentIndex--;
+        loadQuestion();
+    }
+}
+
+function nextQuestion() {
+    const total = currentFilteredQuestions.length;
+    if (currentIndex < total - 1) {
+        currentIndex++;
+        loadQuestion();
+    } else {
+        showResults();
+    }
+}
+
+function showResults() {
+    quizArea.style.display = 'none';
+    resultsArea.style.display = 'flex';
+
+    const total = currentFilteredQuestions.length;
+    let correctCount = 0;
+
+    currentFilteredQuestions.forEach(q => {
+        if (userAnswers[q.num] === q.correct) {
+            correctCount++;
+        }
+    });
+
+    const incorrectCount = total - correctCount;
+    const scorePct = Math.round((correctCount / total) * 100);
+
+    document.getElementById('final-score-percent').textContent = `${scorePct}%`;
+    document.getElementById('res-total').textContent = total;
+    document.getElementById('res-correct').textContent = correctCount;
+    document.getElementById('res-incorrect').textContent = incorrectCount;
+}
+
+function restartQuiz() {
+    filterQuestions();
+}
+
+// Inicializar na carga
+window.onload = initQuiz;
+</script>
+
+</body>
+</html>
