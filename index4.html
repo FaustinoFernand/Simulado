@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulado por Etapas: Administração Pública de Angola</title>
+    <style>
+        :root {
+            --primary: #1a365d;
+            --primary-light: #2b6cb0;
+            --accent: #c53030;
+            --bg: #edf2f7;
+            --card-bg: #ffffff;
+            --text: #2d3748;
+            --text-muted: #718096;
+            --correct: #38a169;
+            --correct-bg: #f0fff4;
+            --correct-border: #c6f6d5;
+            --incorrect: #e53e3e;
+            --incorrect-bg: #fff5f5;
+            --incorrect-border: #fed7d7;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-top: 6px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin: 0 0 8px 0;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Simulado Selector Menu */
+        .quiz-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .menu-btn {
+            background-color: #f7fafc;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .menu-btn:hover {
+            border-color: var(--primary-light);
+            background-color: #ebf8ff;
+        }
+
+        .menu-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .stat-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: var(--border);
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .module-tag {
+            display: inline-block;
+            background-color: #ebf8ff;
+            color: var(--primary-light);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            border: 1px solid #bee3f8;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1a202c;
+            line-height: 1.5;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: #ffffff;
+            border: 2px solid var(--border);
+            padding: 14px 18px;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text);
+            outline: none;
+            display: flex;
+            align-items: flex-start;
+            line-height: 1.4;
+        }
+
+        .option-prefix {
+            font-weight: bold;
+            margin-right: 10px;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary-light);
+            background-color: #ebf8ff;
+        }
+
+        .option-btn.selected-correct {
+            background-color: var(--correct-bg);
+            border-color: var(--correct);
+            color: #22543d;
+            font-weight: 600;
+        }
+
+        .option-btn.selected-incorrect {
+            background-color: var(--incorrect-bg);
+            border-color: var(--incorrect);
+            color: #742a2a;
+        }
+
+        .option-btn.show-correct {
+            border-color: var(--correct);
+            background-color: var(--correct-bg);
+            color: #22543d;
+        }
+
+        .feedback-box {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 8px;
+            display: none;
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+
+        .feedback-box.correct {
+            background-color: var(--correct-bg);
+            border: 1px solid var(--correct-border);
+            color: #22543d;
+        }
+
+        .feedback-box.incorrect {
+            background-color: var(--incorrect-bg);
+            border: 1px solid var(--incorrect-border);
+            color: #742a2a;
+        }
+
+        .feedback-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-actions {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-light);
+        }
+
+        .btn:disabled {
+            background-color: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background-color: #cbd5e0;
+        }
+
+        /* Result Screen */
+        .result-screen {
+            display: none;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .score-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .score-number {
+            font-size: 2.2rem;
+            font-weight: bold;
+        }
+
+        .score-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .stat-card {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-card-val {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-card-lbl {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 18px;
+            }
+            .quiz-menu {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .summary-stats {
+                grid-template-columns: 1fr;
+            }
+            .result-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Simulado de Administração Pública em Angola</h1>
+            <p class="subtitle">Guia de 60 Questões dividido em 5 Blocos de 12 Perguntas cada</p>
+        </header>
+
+        <!-- Menu de Seleção de Simulado -->
+        <div class="quiz-menu">
+            <button class="menu-btn active" onclick="switchSimulado(1)" id="menu-btn-1">📝 Simulado 1<br><small>(Perg. 1–12)</small></button>
+            <button class="menu-btn" onclick="switchSimulado(2)" id="menu-btn-2">📝 Simulado 2<br><small>(Perg. 13–24)</small></button>
+            <button class="menu-btn" onclick="switchSimulado(3)" id="menu-btn-3">📝 Simulado 3<br><small>(Perg. 25–36)</small></button>
+            <button class="menu-btn" onclick="switchSimulado(4)" id="menu-btn-4">📝 Simulado 4<br><small>(Perg. 37–48)</small></button>
+            <button class="menu-btn" onclick="switchSimulado(5)" id="menu-btn-5">📝 Simulado 5<br><small>(Perg. 49–60)</small></button>
+        </div>
+
+        <!-- Quiz Active Area -->
+        <div id="quiz-area">
+            <div class="stat-bar">
+                <span id="question-count">Questão 1 de 12</span>
+                <span id="score-tracker">Pontuação: 0</span>
+            </div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="module-tag" id="module-tag">Módulo I: Organização do Estado</div>
+
+            <div class="question-text" id="question-text">
+                Carregando pergunta...
+            </div>
+
+            <div class="options-container" id="options-container">
+                <!-- Opções injetadas dinamicamente -->
+            </div>
+
+            <div class="feedback-box" id="feedback-box">
+                <div class="feedback-title" id="feedback-title"></div>
+                <div id="feedback-text"></div>
+            </div>
+
+            <div class="nav-actions">
+                <button class="btn btn-secondary" id="prev-btn" onclick="prevQuestion()" disabled>Anterior</button>
+                <button class="btn" id="next-btn" onclick="nextQuestion()" disabled>Próxima</button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div class="result-screen" id="result-screen">
+            <h2 id="result-title">Simulado 1 Concluído!</h2>
+            <p style="color: var(--text-muted);">Confira abaixo o seu resultado nesta etapa:</p>
+
+            <div class="score-circle">
+                <span class="score-number" id="final-percentage">0%</span>
+                <span class="score-label">Aproveitamento</span>
+            </div>
+
+            <div class="summary-stats">
+                <div class="stat-card">
+                    <div class="stat-card-val" id="stat-total">12</div>
+                    <div class="stat-card-lbl">Total de Questões</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-val" id="stat-correct" style="color: var(--correct);">0</div>
+                    <div class="stat-card-lbl">Acertos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-val" id="stat-incorrect" style="color: var(--incorrect);">0</div>
+                    <div class="stat-card-lbl">Erros</div>
+                </div>
+            </div>
+
+            <p id="performance-message" style="margin: 20px 0; font-weight: 600; color: var(--primary);"></p>
+
+            <div class="result-actions">
+                <button class="btn btn-secondary" onclick="restartCurrentSimulado()">Refazer este Simulado</button>
+                <button class="btn" id="next-simulado-btn" onclick="goToNextSimulado()">Avançar para Próximo Simulado</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const allQuestions = [
+            // SIMULADO 1 (Perguntas 1 a 12)
+            {
+                id: 1,
+                module: "Módulo I: Organização do Estado e Princípios Constitucionais",
+                question: "O que é a Organização do Estado segundo a CRA?",
+                options: [
+                    "É o conjunto exclusivo de tribunais judiciais que fiscalizam o orçamento do Governo.",
+                    "É a forma como o Estado se organiza politicamente, territorialmente e administrativamente.",
+                    "É a estrutura empresarial privada responsável pelo setor extrativo de petróleo.",
+                    "É o sistema de segurança militar focado unicamente na proteção das fronteiras terrestres."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q1): A Organização do Estado é a forma como o Estado se organiza politicamente, territorialmente e administrativamente."
+            },
+            {
+                id: 2,
+                module: "Módulo I: Organização do Estado e Princípios Constitucionais",
+                question: "Quais são os princípios fundamentais da Administração Pública angolana?",
+                options: [
+                    "Lucratividade, sigilo absoluto, parcialidade e arbitrariedade.",
+                    "Centralização rigorosa, informalidade, apadrinhamento e isenção de regras.",
+                    "Legalidade, imparcialidade, transparência, responsabilidade, eficiência e serviço ao interesse público.",
+                    "Autonomia absoluta dos órgãos, ausência de prestação de contas e contratação direta."
+                ],
+                correct: 2,
+                explanation: "Resposta do Guia (Q2): Os princípios fundamentais são legalidade, imparcialidade, transparência, responsabilidade, eficiência e serviço ao interesse público."
+            },
+            {
+                id: 3,
+                module: "Módulo I: Organização do Estado e Princípios Constitucionais",
+                question: "O que é o princípio da legalidade na Administração Pública?",
+                options: [
+                    "Permite ao funcionário criar regulamentos sem necessidade de base legal.",
+                    "Todos os atos da Administração devem estar de acordo com a lei e a Constituição.",
+                    "Determina que as leis só se aplicam aos cidadãos comuns e não às autoridades.",
+                    "Exige autorização judicial prévia para a publicação de qualquer ato administrativo."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q3): O princípio da legalidade determina que todos os atos da Administração devem estar de acordo com a lei e a Constituição."
+            },
+            {
+                id: 4,
+                module: "Módulo I: Organização do Estado e Princípios Constitucionais",
+                question: "O que é o princípio da imparcialidade?",
+                options: [
+                    "Priorizar o atendimento a familiares, amigos e correligionários.",
+                    "O funcionário público deve agir sem favoritismo nem discriminação.",
+                    "Atender preferencialmente cidadãos que ofereçam regalias ao serviço público.",
+                    "Decidir processos de forma aleatória sem critérios fixados por norma."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q4): O princípio da imparcialidade estabelece que o funcionário público deve agir sem favoritismo nem discriminação."
+            },
+            {
+                id: 5,
+                module: "Módulo I: Organização do Estado e Princípios Constitucionais",
+                question: "Como se garante o acesso aos serviços públicos?",
+                options: [
+                    "Pela cobrança de taxas elevadas para selecionar apenas utentes qualificados.",
+                    "Pela igualdade e pelo direito de todos serem atendidos.",
+                    "Através de sorteios quinzenais em praça pública.",
+                    "Ao restringir o atendimento a residentes das sedes provinciais."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q5): O acesso aos serviços públicos garante-se pela igualdade e pelo direito de todos serem atendidos."
+            },
+            {
+                id: 6,
+                module: "Módulo I: Organização do Estado e Princípios Constitucionais",
+                question: "Qual é o papel do Estado no bem-estar social?",
+                options: [
+                    "Transferir integralmente o dever de proteção social para organizações privadas estrangeiras.",
+                    "Promover políticas públicas de desenvolvimento, justiça social e qualidade de vida.",
+                    "Reduzir investimentos na saúde e educação para focar na acumulação de divisas.",
+                    "Limitar a atuação estatal à cobrança de impostos e sanções disciplinares."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q6): O papel do Estado é promover políticas públicas de desenvolvimento, justiça social e qualidade de vida."
+            },
+            {
+                id: 7,
+                module: "Módulo II: Administração Local do Estado (Lei n.º 15/16)",
+                question: "O que é a Administração Local do Estado segundo a Lei n.º 15/16?",
+                options: [
+                    "É o corpo diplomático de embaixadas de Angola no exterior.",
+                    "É o conjunto de órgãos que representam o Estado nas províncias, municípios e comunas.",
+                    "São as empresas comunitárias criadas por iniciativa dos cidadãos locais.",
+                    "É o grupo de tribunais itinerantes de jurisdição municipal."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q7): É o conjunto de órgãos que representam o Estado nas províncias, municípios e comunas."
+            },
+            {
+                id: 8,
+                module: "Módulo II: Administração Local do Estado (Lei n.º 15/16)",
+                question: "Quais são os principais órgãos da Administração Local do Estado?",
+                options: [
+                    "Governos provinciais, administrações municipais e administrações comunais.",
+                    "Ministérios, Assembleia Nacional e Presidência da República.",
+                    "Tribunal Supremo, Tribunal Constitucional e Tribunal de Contas.",
+                    "Empresas públicas provinciais e institutos autónomos de gestão tributária."
+                ],
+                correct: 0,
+                explanation: "Resposta do Guia (Q8): São os Governos provinciais, administrações municipais e administrações comunais."
+            },
+            {
+                id: 9,
+                module: "Módulo II: Administração Local do Estado (Lei n.º 15/16)",
+                question: "Qual é o papel do Governo Provincial na Administração Local?",
+                options: [
+                    "Aprovar a Constituição e legislar em matéria penal.",
+                    "Coordenar e executar políticas públicas a nível provincial.",
+                    "Emitir moeda nacional e fixar taxas de câmbio internacionais.",
+                    "Julgar recursos judiciais e conflitos entre particulares."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q9): O papel do Governo Provincial é coordenar e executar políticas públicas a nível provincial."
+            },
+            {
+                id: 10,
+                module: "Módulo II: Administração Local do Estado (Lei n.º 15/16)",
+                question: "Quais são as funções de uma Administração Municipal?",
+                options: [
+                    "Elaborar tratados internacionais de cooperação militar.",
+                    "Executar políticas públicas locais, promover desenvolvimento e prestar serviços à população.",
+                    "Fiscalizar a atividade dos deputados na Assembleia Nacional.",
+                    "Definir a política monetária central do Banco Nacional de Angola."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q10): Executar políticas públicas locais, promover o desenvolvimento e prestar serviços à população."
+            },
+            {
+                id: 11,
+                module: "Módulo II: Administração Local do Estado (Lei n.º 15/16)",
+                question: "Explique a importância da descentralização administrativa.",
+                options: [
+                    "Concentrar todo o poder decisório na capital Luanda.",
+                    "Permite que decisões e serviços estejam mais próximos da população.",
+                    "Isentar os administradores locais de prestar contas das suas receitas.",
+                    "Eliminar as carreiras técnicas no funcionalismo público."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q11): A descentralização permite que as decisões e os serviços públicos estejam mais próximos da população."
+            },
+            {
+                id: 12,
+                module: "Módulo II: Administração Local do Estado (Lei n.º 15/16)",
+                question: "Quais são as competências das administrações locais no desenvolvimento das comunidades?",
+                options: [
+                    "Privatizar serviços de infraestrutura sem prévia consulta.",
+                    "Promover o desenvolvimento económico e social, gerir infraestruturas básicas, apoiar a educação, saúde, cultura, desporto e assegurar a participação dos cidadãos.",
+                    "Arrecadar impostos de importação e exportação nos portos centrais.",
+                    "Emitir passaportes e vistos diplomáticos para o estrangeiro."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q12): Promover o desenvolvimento económico e social, gerir infraestruturas básicas, apoiar educação, saúde, cultura, desporto e assegurar a participação dos cidadãos."
+            },
+
+            // SIMULADO 2 (Perguntas 13 a 24)
+            {
+                id: 13,
+                module: "Módulo III: Regime Jurídico da Função Pública (Lei n.º 26/22)",
+                question: "O que estabelece a Lei n.º 26/22?",
+                options: [
+                    "Regula as sociedades comerciais de capital público.",
+                    "Define princípios, direitos, deveres e regime jurídico dos funcionários públicos.",
+                    "Cria o Código de Processo Penal Angolano.",
+                    "Fixa o valor mínimo do salário mínimo nacional das empresas privadas."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q13): A Lei n.º 26/22 define princípios, direitos, deveres e regime jurídico dos funcionários públicos."
+            },
+            {
+                id: 14,
+                module: "Módulo III: Regime Jurídico da Função Pública (Lei n.º 26/22)",
+                question: "Quem pode exercer funções públicas em Angola?",
+                options: [
+                    "Apenas quem for indicado pessoalmente pelo chefe da repartição.",
+                    "Cidadãos com requisitos legais, via concurso público ou nomeação legal.",
+                    "Qualquer cidadão estrangeiro residente há mais de um mês no país.",
+                    "Trabalhadores autônomos contratados sem formalidade documental."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q14): Podem exercer funções públicas os cidadãos que preencham os requisitos legais, mediante concurso ou nomeação legal."
+            },
+            {
+                id: 15,
+                module: "Módulo III: Regime Jurídico da Função Pública (Lei n.º 26/22)",
+                question: "Quais são os direitos fundamentais do funcionário público?",
+                options: [
+                    "Isenção de impostos, viagem anual ao exterior e viatura pessoal.",
+                    "Remuneração, formação, progressão na carreira e proteção social.",
+                    "Ausência de teto de jornada de trabalho e folga incondicional.",
+                    "Apropriação de bens inservíveis do Estado após dois anos de uso."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q15): Remuneração, formação, progressão na carreira e proteção social."
+            },
+            {
+                id: 16,
+                module: "Módulo III: Regime Jurídico da Função Pública (Lei n.º 26/22)",
+                question: "Quais são os deveres principais do funcionário público?",
+                options: [
+                    "Atender prioritariamente quem apresentar recomendações particulares.",
+                    "Cumprir a lei, servir o interesse público, agir com ética e responsabilidade.",
+                    "Manter em sigilo irregularidades presenciadas nas reparações públicas.",
+                    "Trabalhar exclusivamente quando houver supervisão presencial."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q16): Cumprir a lei, servir o interesse público, agir com ética e responsabilidade."
+            },
+            {
+                id: 17,
+                module: "Módulo III: Regime Jurídico da Função Pública (Lei n.º 26/22)",
+                question: "O que é responsabilidade disciplinar na função pública?",
+                options: [
+                    "A perda imediata de cidadania ao cometer atrasos no trabalho.",
+                    "O funcionário pode ser sancionado se violar normas ou deveres.",
+                    "A obrigatoriedade de pagar custas judiciais em todos os processos.",
+                    "O dever exclusivo de indenizar danos causados a terceiros sem processo prévio."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q17): É o mecanismo pelo qual o funcionário pode ser sancionado disciplinarmente caso viole normas ou deveres."
+            },
+            {
+                id: 18,
+                module: "Módulo III: Regime Jurídico da Função Pública (Lei n.º 26/22)",
+                question: "O que é carreira na função pública?",
+                options: [
+                    "A transição temporária entre o setor público e o setor privado.",
+                    "O conjunto de categorias que permitem a progressão profissional do trabalhador.",
+                    "O tempo total de aposentação sem obrigatoriedade de avaliação.",
+                    "O provimento em cargo de chefia por indicação direta."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q18): É o conjunto de categorias que permitem a progressão do funcionário na Função Pública."
+            },
+            {
+                id: 19,
+                module: "Módulo III: Regime Jurídico da Função Pública (Lei n.º 26/22)",
+                question: "Como ocorre a progressão na carreira do funcionário público?",
+                options: [
+                    "Exclusivamente por critério de idade do trabalhador.",
+                    "Por avaliação de desempenho + tempo de serviço + requisitos legais.",
+                    "Através de sorteio anual organizado pela direção de recursos humanos.",
+                    "Sempre que o funcionário concluir qualquer curso superior."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q19): Ocorre por avaliação de desempenho, tempo de serviço e cumprimento de requisitos legais."
+            },
+            {
+                id: 20,
+                module: "Módulo IV: Código do Procedimento Administrativo (Lei n.º 31/22)",
+                question: "O que é o Código do Procedimento Administrativo - Lei 31/22 (CPA)?",
+                options: [
+                    "O manual de procedimentos tributários das alfândegas.",
+                    "Lei que regula como a Administração Pública toma decisões e pratica atos administrativos.",
+                    "A lei que define crimes e sanções no código penal.",
+                    "O estatuto da magistratura e do ministério público."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q20): O CPA é a lei que regula como a Administração Pública toma decisões e pratica atos administrativos."
+            },
+            {
+                id: 21,
+                module: "Módulo IV: Código do Procedimento Administrativo (Lei n.º 31/22)",
+                question: "Qual é o objetivo principal do Código do Procedimento Administrativo?",
+                options: [
+                    "Privatizar a elaboração de pareceres técnicos estatais.",
+                    "Garantir legalidade, transparência e justiça nas decisões administrativas.",
+                    "Reduzir o direito de recurso dos cidadãos perante o Estado.",
+                    "Acelerar processos dispensando a fundamentação legal dos atos."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q21): Garantir legalidade, transparência e justiça nas decisões administrativas."
+            },
+            {
+                id: 22,
+                module: "Módulo IV: Código do Procedimento Administrativo (Lei n.º 31/22)",
+                question: "Quais são as fases ordenadas do procedimento administrativo segundo o CPA?",
+                options: [
+                    "Denúncia, Investigação, Julgamento e Prisão.",
+                    "Iniciativa, instrução, decisão e execução.",
+                    "Orçamento, Empenho, Liquidação e Pagamento.",
+                    "Petição, Publicação, Revogação e Arquivo."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q22): As fases do procedimento administrativo são: iniciativa, instrução, decisão e execução."
+            },
+            {
+                id: 23,
+                module: "Módulo IV: Código do Procedimento Administrativo (Lei n.º 31/22)",
+                question: "O que é um ato administrativo?",
+                options: [
+                    "Uma manifestação opinativa publicada por um cidadão nas redes sociais.",
+                    "Uma decisão da Administração Pública com efeitos jurídicos.",
+                    "Um contrato mercantil entre duas empresas privadas.",
+                    "Uma declaração verbal não vinculativa de um agente público."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q23): Um ato administrativo é a decisão da Administração Pública que produz efeitos jurídicos."
+            },
+            {
+                id: 24,
+                module: "Módulo IV: Código do Procedimento Administrativo (Lei n.º 31/22)",
+                question: "Quais são os elementos essenciais do ato administrativo?",
+                options: [
+                    "Preço, Lucro, Desconto, Isenção e Juros.",
+                    "Competência, finalidade, forma, motivo e objeto.",
+                    "Assinatura, Carimbo, Marca d'água, Protocolo e Cópia.",
+                    "Nome, Morada, Estado Civil, Profissão e Bilhete de Identidade."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q24): Os elementos essenciais do ato administrativo são: competência, finalidade, forma, motivo e objeto."
+            },
+
+            // SIMULADO 3 (Perguntas 25 a 36)
+            {
+                id: 25,
+                module: "Módulo IV: Código do Procedimento Administrativo (Lei n.º 31/22)",
+                question: "Quando é que um ato administrativo é considerado inválido?",
+                options: [
+                    "Quando é publicado em suporte papel e não digital.",
+                    "Quando viola a lei ou é praticado por autoridade incompetente.",
+                    "Quando beneficia um grupo alargado de cidadãos.",
+                    "Sempre que for praticado fora do horário normal de expediente."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q25): O ato administrativo é inválido quando viola a lei ou é praticado por autoridade incompetente."
+            },
+            {
+                id: 26,
+                module: "Módulo IV: Código do Procedimento Administrativo (Lei n.º 31/22)",
+                question: "O que é o direito de audiência prévia do cidadão?",
+                options: [
+                    "A obrigação de ser atendido por um juiz antes de recorrer à administração.",
+                    "O cidadão pode apresentar argumentos e alegações antes da decisão final da Administração.",
+                    "O direito de participar na fixação de salários públicos.",
+                    "A garantia de audiência presencial com o Ministro da tutela."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q26): É o direito do cidadão apresentar argumentos e alegações antes que a decisão final seja tomada."
+            },
+            {
+                id: 27,
+                module: "Módulo IV: Código do Procedimento Administrativo (Lei n.º 31/22)",
+                question: "O que é a transparência na Administração Pública?",
+                options: [
+                    "Permitir o livre acesso de qualquer pessoa às reuniões do Conselho de Ministros.",
+                    "Abertura e clareza nas ações e decisões do Estado.",
+                    "Obrigação de publicar o patrimônio privado de todos os funcionários.",
+                    "A liberação irrestrita de documentos com dados pessoais sigilosos."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q27): A transparência traduz-se na abertura e clareza nas ações e decisões do Estado."
+            },
+            {
+                id: 28,
+                module: "Módulo IV: Código do Procedimento Administrativo (Lei n.º 31/22)",
+                question: "Como se dá a participação do cidadão na gestão pública?",
+                options: [
+                    "Exclusivamente através do voto nas eleições gerais.",
+                    "Através de reclamações, sugestões ou consultas públicas.",
+                    "Pelo pagamento facultativo de impostos adicionais.",
+                    "Apenas quando convocado verbalmente pela autoridade."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q28): Dá-se através de reclamações, sugestões ou consultas públicas."
+            },
+            {
+                id: 29,
+                module: "Módulo III: Carreiras do Regime Geral (Decreto n.º 24/91)",
+                question: "O que estabelece o Decreto n.º 24/91?",
+                options: [
+                    "Regula a concessão de licenças comerciais no setor da exploração mineira.",
+                    "Princípios e estrutura das carreiras no regime geral da função pública.",
+                    "O Código Tributário dos Impostos Locais.",
+                    "As regras de aposentação das Forças Armadas."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q29): Estabelece os princípios e a estrutura das carreiras no regime geral da função pública."
+            },
+            {
+                id: 30,
+                module: "Módulo V: Ética, Deontologia e Integridade Pública",
+                question: "O que é ética na função pública?",
+                options: [
+                    "As regras de etiqueta para eventos oficiais e cerimoniais.",
+                    "Conjunto de valores e deveres que orientam a conduta do funcionário público.",
+                    "O cumprimento estrito de metas sem consideração pela moralidade.",
+                    "O estatuto disciplinar exclusivo dos altos cargos do Estado."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q30): A ética na função pública é o conjunto de valores e deveres que orientam a conduta do funcionário público."
+            },
+            {
+                id: 31,
+                module: "Módulo V: Ética, Deontologia e Integridade Pública",
+                question: "Quais são os principais valores éticos do servidor público?",
+                options: [
+                    "Individualismo, ambição, astúcia e rivalidade.",
+                    "Honestidade, lealdade, respeito, responsabilidade e profissionalismo.",
+                    "Informalidade, rapidez sem critério, flexibilidade de normas e corporativismo.",
+                    "Lucro, eficiência financeira, sigilo irrestrito e condescendência."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q31): Honestidade, lealdade, respeito, responsabilidade e profissionalismo."
+            },
+            {
+                id: 32,
+                module: "Módulo V: Ética, Deontologia e Integridade Pública",
+                question: "Por que a ética é importante na Administração Pública?",
+                options: [
+                    "Garante que os funcionários não necessitem de fiscalização superior.",
+                    "Garante credibilidade, confiança e boa gestão dos recursos públicos.",
+                    "Serve apenas para atender exigências de organismos internacionais.",
+                    "Substitui a necessidade de leis e regulamentos formais."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q32): A ética é essencial porque garante credibilidade, confiança e a boa gestão dos recursos públicos."
+            },
+            {
+                id: 33,
+                module: "Módulo V: Ética, Deontologia e Integridade Pública",
+                question: "O que é conflito de interesses no setor público?",
+                options: [
+                    "O choque de opiniões técnicas entre dois chefes de departamento.",
+                    "Situação em que o interesse pessoal do funcionário interfere no interesse público.",
+                    "A disputa de vagas promovida em concursos públicos.",
+                    "A divergência entre o orçamento aprovado e o valor executado."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q33): Ocorre conflito de interesses quando o interesse pessoal interfere na prossecução do interesse público."
+            },
+            {
+                id: 34,
+                module: "Módulo V: Ética, Deontologia e Integridade Pública",
+                question: "Como se deve evitar o conflito de interesses?",
+                options: [
+                    "Ocultando a relação de parentesco até ao fim do processo.",
+                    "Agindo com transparência e declarando impedimentos expressos.",
+                    "Delegando informalmente a decisão a um subordinado direto.",
+                    "Solicitando pagamento adicional para manter a imparcialidade."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q34): Deve-se evitar agindo com transparência e declarando eventuais impedimentos ou suspeições."
+            },
+            {
+                id: 35,
+                module: "Módulo V: Ética, Deontologia e Integridade Pública",
+                question: "O que é assédio no local de trabalho?",
+                options: [
+                    "A exigência de cumprimento do horário legal de expediente.",
+                    "Conduta abusiva que viola a dignidade e integridade do trabalhador.",
+                    "A atribuição de tarefas de acordo com a categoria do funcionário.",
+                    "A avaliação periódica de desempenho realizada pela chefia."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q35): O assédio é qualquer conduta abusiva que viole a dignidade e a integridade do trabalhador."
+            },
+            {
+                id: 36,
+                module: "Módulo V: Ética, Deontologia e Integridade Pública",
+                question: "Qual é a importância do sigilo profissional?",
+                options: [
+                    "Esconder do público irregularidades cometidas no serviço.",
+                    "Proteger informações internas sigilosas e garantir a segurança institucional.",
+                    "Impedir que os cidadãos conheçam o organograma da repartição.",
+                    "Garantir o anonimato de decisões arbitrárias."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q36): Proteger informações internas e garantir a segurança institucional."
+            },
+
+            // SIMULADO 4 (Perguntas 37 a 48)
+            {
+                id: 37,
+                module: "Módulo V: Ética, Deontologia e Integridade Pública",
+                question: "Como deve o servidor público tratar o património público?",
+                options: [
+                    "Pode utilizar viaturas e materiais públicos para fins pessoais nos fins de semana.",
+                    "Com zelo, responsabilidade e afetação exclusiva à finalidade pública.",
+                    "A responsabilidade cabe unicamente ao pessoal encarregado da limpeza e manutenção.",
+                    "Pode doá-los caso considere que o bem está obsoleto."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q37): O servidor deve tratar o património público com zelo, responsabilidade e destinação à finalidade pública."
+            },
+            {
+                id: 38,
+                module: "Módulo V: Ética, Deontologia e Integridade Pública",
+                question: "O que é corrupção na Administração Pública?",
+                options: [
+                    "O uso legal das verbas de representação do serviço.",
+                    "Uso indevido do cargo público para obtenção de benefício próprio ou de terceiros.",
+                    "A demora justificada no processamento de expedientes complexos.",
+                    "O atraso no pagamento de salários por indisponibilidade orçamentária."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q38): É o uso indevido do cargo ou função pública para benefício próprio ou favorecimento de terceiros."
+            },
+            {
+                id: 39,
+                module: "Módulo V: Ética, Deontologia e Integridade Pública",
+                question: "Quais são as formas fundamentais de combater a corrupção?",
+                options: [
+                    "Diminuir a fiscalização e eliminar auditorias internas.",
+                    "Transparência, fiscalização rigorosa, punição legal e educação ética.",
+                    "Manter os processos administrativos em sigilo absoluto.",
+                    "Suprimir os canais de denúncia da cidadania."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q39): O combate à corrupção faz-se através da transparência, fiscalização, aplicação de punições e educação ética."
+            },
+            {
+                id: 40,
+                module: "Módulo V: Ética, Deontologia e Integridade Pública",
+                question: "Qual é o papel do cidadão no controlo da Administração Pública?",
+                options: [
+                    "Submeter-se passivamente às decisões sem questionar.",
+                    "Fiscalizar, denunciar irregularidades e participar nas decisões públicas.",
+                    "Pagar as taxas administrativas sem exigir recibo oficial.",
+                    "Substituir o funcionário público no atendimento geral."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q40): Cabe ao cidadão fiscalizar, denunciar irregularidades e participar nas decisões públicas."
+            },
+            {
+                id: 41,
+                module: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+                question: "O que são políticas públicas?",
+                options: [
+                    "Campanhas promocionais de partidos em época eleitoral.",
+                    "Ações e programas do Estado para garantir direitos e melhorar a vida da população.",
+                    "Normas internas de conduta de empresas multinacionais.",
+                    "Estratégias de investimento do mercado financeiro privado."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q41): Políticas públicas são ações e programas concebidos pelo Estado para garantir direitos e melhorar a vida da população."
+            },
+            {
+                id: 42,
+                module: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+                question: "Quais são exemplos típicos de políticas públicas?",
+                options: [
+                    "Ações de marketing de empresas de telefonia móvel.",
+                    "Programas de saúde, educação, habitação, segurança e assistência social.",
+                    "Abertura de contas bancárias particulares e concessão de crédito privado.",
+                    "Importação de bens de luxo para revenda no mercado livre."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q42): São exemplos as políticas públicas de saúde, educação, habitação, segurança e assistência social."
+            },
+            {
+                id: 43,
+                module: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+                question: "Como se avalia a qualidade do serviço público?",
+                options: [
+                    "Pelo valor total das taxas cobradas ao cidadão.",
+                    "Pela satisfação do cidadão, eficiência e alcance dos resultados.",
+                    "Apenas pelo número de funcionários existentes no departamento.",
+                    "Pela modernidade arquitetónica do edifício da repartição."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q43): Avalia-se pela satisfação do cidadão, pela eficiência na prestação e pelos resultados alcançados."
+            },
+            {
+                id: 44,
+                module: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+                question: "O que é eficiência na Administração Pública?",
+                options: [
+                    "Gastar a totalidade do orçamento sem importar o resultado final.",
+                    "Fazer mais com menos recursos e no menor tempo possível.",
+                    "Atender apenas a metade das requisições diárias para evitar erros.",
+                    "Atrasar o atendimento para demonstrar rigor técnico."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q44): Eficiência significa fazer mais e melhor otimizando o uso de recursos e tempo."
+            },
+            {
+                id: 45,
+                module: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+                question: "O que é eficácia na Administração Pública?",
+                options: [
+                    "O grau de simpatia no atendimento ao utente.",
+                    "Atingir os objetivos e metas propostos pela instituição.",
+                    "O valor economizado nas compras públicas.",
+                    "A publicação tempestiva de relatórios de atividades."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q45): Eficácia é a capacidade de atingir integralmente os objetivos e metas estabelecidos."
+            },
+            {
+                id: 46,
+                module: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+                question: "O que é efetividade na Administração Pública?",
+                options: [
+                    "A simples presença física do funcionário no local de trabalho.",
+                    "Gerar impacto real e melhoria sustentável na vida da população.",
+                    "O cumprimento formal das exigências burocráticas.",
+                    "A quantidade bruta de processos arquivados por mês."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q46): Efetividade é a capacidade de gerar um impacto real e duradouro na qualidade de vida dos cidadãos."
+            },
+            {
+                id: 47,
+                module: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+                question: "Qual é a diferença entre centralização e descentralização?",
+                options: [
+                    "Centralização transfere competências; Descentralização concentra poder na capital.",
+                    "Centralização concentra decisões no órgão central; Descentralização transfere poder para níveis locais.",
+                    "Não há qualquer diferença, são sinônimos no direito administrativo.",
+                    "Centralização refere-se ao setor público; Descentralização ao setor empresarial privado."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q47): A centralização concentra o poder decisório; a descentralização transfere poderes para instâncias e níveis locais."
+            },
+            {
+                id: 48,
+                module: "Módulo VI: Gestão Pública, Políticas e Eficiência",
+                question: "O que são órgãos desconcentrados?",
+                options: [
+                    "Entidades privadas contratadas para prestar consultoria.",
+                    "Órgãos do Estado que atuam em nome da administração central em determinado território.",
+                    "Empresas públicas que operam em regime de concorrência no mercado.",
+                    "Organizações não governamentais financiadas pelo Estado."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q48): São órgãos integrados na estrutura do Estado que atuam representativamente em nome da administração central numa dada área territorial."
+            },
+
+            // SIMULADO 5 (Perguntas 49 a 60)
+            {
+                id: 49,
+                module: "Módulo V: Ética e Responsabilidade Disciplinar",
+                question: "Quais são as consequências diretas do incumprimento das normas éticas?",
+                options: [
+                    "Nenhuma, pois as regras éticas são meras recomendações não obrigatórias.",
+                    "Aplicação de sanções como advertência, suspensão ou outras medidas disciplinares.",
+                    "Aumento automático do período de férias anuais.",
+                    "Apenas a transferência do funcionário para outra repartição sem registo na ficha."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q49): O incumprimento das normas éticas pode resultar em sanções como advertência, suspensão ou outras penalidades disciplinares."
+            },
+            {
+                id: 50,
+                module: "Módulo V: Ética e Integridade Pública",
+                question: "Explique a importância da integridade na Administração Pública.",
+                options: [
+                    "Garante que os processos sejam tratados com maior lentidão.",
+                    "Evita a corrupção e fortalece a confiança dos cidadãos nas instituições públicas.",
+                    "Isenta a Administração do cumprimento da legislação fiscal.",
+                    "Permite a contratação direta de serviços sem concurso."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q50): A integridade é vital pois evita a corrupção e fortalece a confiança dos cidadãos no Estado."
+            },
+            {
+                id: 51,
+                module: "Módulo VI: Gestão e Responsabilidade Pública",
+                question: "O que significa responsabilidade no exercício da função pública?",
+                options: [
+                    "Transferir sempre a culpa das falhas para a chefia direta.",
+                    "Responder pelos atos praticados no desempenho das suas funções.",
+                    "Executar ordens de superiores mesmo que manifestamente ilegais.",
+                    "Decidir processos sem fundamentar as razões de facto e de direito."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q51): Significa responder legal e disciplinarmente pelos atos e omissões praticados no exercício da função."
+            },
+            {
+                id: 52,
+                module: "Módulo VI: Atendimento e Serviço Público",
+                question: "Qual é o papel do servidor público no atendimento ao cidadão?",
+                options: [
+                    "Demonstrar autoridade e restringir o tempo de resposta.",
+                    "Prestar serviço com respeito, eficiência e igualdade.",
+                    "Cobrar gratificações informais para acelerar expedientes.",
+                    "Exigir documentos não previstos em regulamento."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q52): Prestar serviço com elevado respeito, eficiência, urbanidade e tratamento igualitário."
+            },
+            {
+                id: 53,
+                module: "Módulo VI: Transparência e Acesso à Informação",
+                question: "Como a Administração Pública pode promover a transparência?",
+                options: [
+                    "Classificando a maioria dos documentos como segredo de Estado.",
+                    "Divulgando informações e garantindo o acesso público a dados administrativos.",
+                    "Restringindo as publicações aos boletins internos das repartições.",
+                    "Cobrando emolumentos elevados para emissão de certidões."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q53): Promove-se a transparência divulgando informações e franqueando o acesso público aos dados de gestão."
+            },
+            {
+                id: 54,
+                module: "Módulo VI: Prestação de Contas e Controlo Social",
+                question: "Explique a importância da prestação de contas no setor público.",
+                options: [
+                    "É um mero formalismo burocrático sem utilidade prática.",
+                    "Permite o controlo social e assegura a responsabilidade na gestão dos recursos públicos.",
+                    "Serve para esconder deficit orçamentais da população.",
+                    "Substitui a fiscalização exercida pelo Tribunal de Contas."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q54): A prestação de contas é essencial pois permite o controlo social e garante a responsabilidade na gestão pública."
+            },
+            {
+                id: 55,
+                module: "Módulo VI: Legislação e Eficiência Administrativa",
+                question: "Como a legislação contribui para a eficiência da Administração Pública?",
+                options: [
+                    "Aumentando a complexidade dos trâmites administrativos.",
+                    "Estabelecendo regras claras para o funcionamento, gestão e atuação dos órgãos.",
+                    "Dando margem para interpretações puramente pessoais por parte do funcionário.",
+                    "Impedindo a utilização de meios tecnológicos na tramitação."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q55): A legislação contribui ao fixar regras e procedimentos claros para o funcionamento e boa gestão."
+            },
+            {
+                id: 56,
+                module: "Módulo VI: Desafios Contemporâneos da Gestão Pública",
+                question: "Quais são os principais desafios da gestão pública moderna em Angola?",
+                options: [
+                    "Aumentar o número de ministérios e a burocracia documental.",
+                    "Combate à corrupção, eficiência administrativa e melhoria da qualidade dos serviços.",
+                    "Eliminar o concurso público para contratações rápidas.",
+                    "Reduzir o uso de sistemas informáticos no atendimento aos utentes."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q56): Os principais desafios incluem o combate à corrupção, o aumento da eficiência e a contínua melhoria dos serviços."
+            },
+            {
+                id: 57,
+                module: "Módulo VI: Desenvolvimento Nacional",
+                question: "Como o serviço público contribui para o desenvolvimento nacional?",
+                options: [
+                    "Ao restringir a atividade económica privada.",
+                    "Executando políticas públicas e prestando serviços essenciais à população.",
+                    "Acumulando receitas sem reinvestir na comunidade.",
+                    "Focando a sua atuação prioritariamente na capital do país."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q57): Contribui executando com rigor as políticas públicas e garantindo a prestação de serviços sociais básicos."
+            },
+            {
+                id: 58,
+                module: "Módulo VI: Implementação de Políticas Públicas",
+                question: "Qual é o papel do funcionário público na implementação de políticas públicas?",
+                options: [
+                    "Apenas formular leis na Assembleia Nacional.",
+                    "Executar os programas governamentais e garantir que os benefícios cheguem à população.",
+                    "Fiscalizar a vida privada dos cidadãos beneficiários.",
+                    "Alterar as metas dos programas sem autorização superior."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q58): O seu papel é executar os programas aprovados e garantir que beneficiem efetivamente a população alvo."
+            },
+            {
+                id: 59,
+                module: "Módulo VI: Capacitação e Formação Contínua",
+                question: "Por que é importante a formação contínua dos funcionários públicos?",
+                options: [
+                    "Apenas para cumprir horário e justificativa de ausência no setor.",
+                    "Para melhorar competências e aprimorar a qualidade dos serviços prestados.",
+                    "Para garantir promoções automáticas sem avaliação de desempenho.",
+                    "Para substituir totalmente a experiência prática dos funcionários antigos."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q59): A formação continuada é fundamental para atualizar competências e aperfeiçoar a qualidade do atendimento e gestão."
+            },
+            {
+                id: 60,
+                module: "Módulo VI: Integração entre Ética, Legalidade e Eficiência",
+                question: "Como a ética, a legalidade e a eficiência se relacionam na Administração Pública?",
+                options: [
+                    "São princípios concorrentes e incompatíveis entre si.",
+                    "Juntas garantem um serviço público justo, responsável e eficaz.",
+                    "A legalidade pode ser ignorada desde que haja eficiência rápida.",
+                    "A ética aplica-se aos cidadãos e a eficiência aos gestores."
+                ],
+                correct: 1,
+                explanation: "Resposta do Guia (Q60): Ética, legalidade e eficiência integram-se harmonicamente para assegurar um serviço público justo, responsável e altamente eficaz."
+            }
+        ];
+
+        let currentSimuladoIndex = 1;
+        let currentQuestionInSimulado = 0;
+        let score = 0;
+        let activeQuestions = [];
+        let userAnswers = [];
+
+        // Elements
+        const quizArea = document.getElementById('quiz-area');
+        const resultScreen = document.getElementById('result-screen');
+        const questionCountEl = document.getElementById('question-count');
+        const scoreTrackerEl = document.getElementById('score-tracker');
+        const progressBarEl = document.getElementById('progress-bar');
+        const moduleTagEl = document.getElementById('module-tag');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainerEl = document.getElementById('options-container');
+        const feedbackBoxEl = document.getElementById('feedback-box');
+        const feedbackTitleEl = document.getElementById('feedback-title');
+        const feedbackTextEl = document.getElementById('feedback-text');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        function switchSimulado(simuladoNum) {
+            currentSimuladoIndex = simuladoNum;
+            currentQuestionInSimulado = 0;
+            score = 0;
+
+            // Highlight menu button
+            for (let i = 1; i <= 5; i++) {
+                const btn = document.getElementById(`menu-btn-${i}`);
+                if (i === simuladoNum) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            }
+
+            // Slice 12 questions for this simulado
+            const start = (simuladoNum - 1) * 12;
+            const end = start + 12;
+            activeQuestions = allQuestions.slice(start, end);
+            userAnswers = new Array(12).fill(null);
+
+            resultScreen.style.display = 'none';
+            quizArea.style.display = 'block';
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = activeQuestions[currentQuestionInSimulado];
+            
+            questionCountEl.textContent = `Questão ${currentQuestionInSimulado + 1} de 12 (Pergunta N.º ${q.id})`;
+            scoreTrackerEl.textContent = `Pontuação: ${score}`;
+            moduleTagEl.textContent = q.module;
+            questionTextEl.textContent = `${q.id}. ${q.question}`;
+            
+            const progress = ((currentQuestionInSimulado + 1) / 12) * 100;
+            progressBarEl.style.width = `${progress}%`;
+
+            optionsContainerEl.innerHTML = '';
+            feedbackBoxEl.style.display = 'none';
+            feedbackBoxEl.className = 'feedback-box';
+
+            const prefixes = ['A', 'B', 'C', 'D'];
+
+            q.options.forEach((optText, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<span class="option-prefix">${prefixes[i]})</span> <span>${optText}</span>`;
+                btn.onclick = () => selectOption(i);
+                optionsContainerEl.appendChild(btn);
+            });
+
+            prevBtn.disabled = currentQuestionInSimulado === 0;
+            
+            if (userAnswers[currentQuestionInSimulado] !== null) {
+                renderAnsweredState();
+            } else {
+                nextBtn.disabled = true;
+            }
+
+            if (currentQuestionInSimulado === 11) {
+                nextBtn.textContent = "Ver Resultado";
+            } else {
+                nextBtn.textContent = "Próxima";
+            }
+        }
+
+        function selectOption(selectedIndex) {
+            if (userAnswers[currentQuestionInSimulado] !== null) return;
+
+            const q = activeQuestions[currentQuestionInSimulado];
+            const isCorrect = selectedIndex === q.correct;
+            
+            userAnswers[currentQuestionInSimulado] = {
+                selected: selectedIndex,
+                isCorrect: isCorrect
+            };
+
+            if (isCorrect) {
+                score++;
+                scoreTrackerEl.textContent = `Pontuação: ${score}`;
+            }
+
+            renderAnsweredState();
+            nextBtn.disabled = false;
+        }
+
+        function renderAnsweredState() {
+            const q = activeQuestions[currentQuestionInSimulado];
+            const ans = userAnswers[currentQuestionInSimulado];
+            const buttons = optionsContainerEl.querySelectorAll('.option-btn');
+
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === q.correct) {
+                    btn.classList.add('show-correct');
+                }
+                if (ans && idx === ans.selected && !ans.isCorrect) {
+                    btn.classList.add('selected-incorrect');
+                }
+            });
+
+            feedbackBoxEl.style.display = 'block';
+            if (ans.isCorrect) {
+                feedbackBoxEl.classList.add('correct');
+                feedbackTitleEl.innerHTML = `✓ Resposta Correta!`;
+            } else {
+                feedbackBoxEl.classList.add('incorrect');
+                feedbackTitleEl.innerHTML = `✗ Resposta Incorreta!`;
+            }
+            feedbackTextEl.textContent = q.explanation;
+        }
+
+        function nextQuestion() {
+            if (currentQuestionInSimulado < 11) {
+                currentQuestionInSimulado++;
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionInSimulado > 0) {
+                currentQuestionInSimulado--;
+                loadQuestion();
+            }
+        }
+
+        function showResults() {
+            quizArea.style.display = 'none';
+            resultScreen.style.display = 'block';
+
+            const percentage = Math.round((score / 12) * 100);
+            
+            document.getElementById('result-title').textContent = `Simulado ${currentSimuladoIndex} Concluído!`;
+            document.getElementById('stat-total').textContent = 12;
+            document.getElementById('stat-correct').textContent = score;
+            document.getElementById('stat-incorrect').textContent = 12 - score;
+            document.getElementById('final-percentage').textContent = `${percentage}%`;
+
+            const msgEl = document.getElementById('performance-message');
+            if (percentage >= 85) {
+                msgEl.textContent = "Excelente! Demonstrou ótimo domínio deste bloco de legislação!";
+            } else if (percentage >= 70) {
+                msgEl.textContent = "Muito Bom! Compreensão consolidada das matérias estudadas.";
+            } else if (percentage >= 50) {
+                msgEl.textContent = "Aprovado! Contudo, vale a pena rever os pontos com erro para reforçar.";
+            } else {
+                msgEl.textContent = "Necessita de revisão. Recomenda-se reler as respostas do guia e tentar novamente.";
+            }
+
+            const nextSimBtn = document.getElementById('next-simulado-btn');
+            if (currentSimuladoIndex < 5) {
+                nextSimBtn.style.display = 'inline-block';
+                nextSimBtn.textContent = `Avançar para Simulado ${currentSimuladoIndex + 1}`;
+            } else {
+                nextSimBtn.style.display = 'none';
+            }
+        }
+
+        function restartCurrentSimulado() {
+            switchSimulado(currentSimuladoIndex);
+        }
+
+        function goToNextSimulado() {
+            if (currentSimuladoIndex < 5) {
+                switchSimulado(currentSimuladoIndex + 1);
+            }
+        }
+
+        // Init with Simulado 1
+        switchSimulado(1);
+    </script>
+</body>
+</html>
